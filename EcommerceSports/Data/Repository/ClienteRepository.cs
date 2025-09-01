@@ -15,10 +15,18 @@ namespace EcommerceSports.Data.Repository
 
         public void CadastrarCliente(Cliente cliente, List<Endereco> enderecos, Telefone telefone, CartaoCredito cartao)
         {
-            _context.Clientes.Add(cliente);
-            _context.Enderecos.AddRange(enderecos);
-            _context.Telefones.Add(telefone);
-            _context.Cartoes.Add(cartao);
+            try
+            {
+                _context.Clientes.Add(cliente);
+                _context.Enderecos.AddRange(enderecos);
+                _context.Telefones.Add(telefone);
+                _context.Cartoes.Add(cartao);
+                _context.SaveChanges();
+            }
+            catch (Exception ex) 
+            {
+                throw new Exception("Erro ao cadastrar cliente e dados relacionados", ex);
+            }
 
         }
     }
