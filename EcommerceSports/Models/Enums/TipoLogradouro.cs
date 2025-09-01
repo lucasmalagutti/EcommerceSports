@@ -12,6 +12,7 @@
         Beco = 8,
         Passarela = 9,
         Chacara = 10,
-        Outros = 11,
+        Sitio = 11,
+        Outros = 12,
     }
 }
