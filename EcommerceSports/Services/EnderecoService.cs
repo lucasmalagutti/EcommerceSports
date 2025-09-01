@@ -1,5 +1,5 @@
 ﻿using EcommerceSports.Applications.DTO;
-using EcommerceSports.Models;
+using EcommerceSports.Models.Entity;
 using EcommerceSports.Services.Interfaces;
 
 namespace EcommerceSports.Services

@@ -1,4 +1,4 @@
-﻿using EcommerceSports.Models;
+﻿using EcommerceSports.Models.Entity;
 
 namespace EcommerceSports.Data.Infra.Interfaces
 {

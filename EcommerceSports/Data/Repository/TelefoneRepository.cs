@@ -1,5 +1,5 @@
 ﻿using EcommerceSports.Data.Repository.Interfaces;
-using EcommerceSports.Models;
+using EcommerceSports.Models.Entity;
 
 namespace EcommerceSports.Data.Repository
 {

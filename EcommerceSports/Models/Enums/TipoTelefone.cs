@@ -1,4 +1,4 @@
-﻿namespace CrudCliente.Domain.Enumerators
+﻿namespace EcommerceSports.Models.Enums
 {
     public enum TipoTelefone
     {

@@ -1,4 +1,4 @@
-﻿using CrudCliente.Domain.Enumerators;
+﻿using EcommerceSports.Models.Enums;
 
 namespace EcommerceSports.Applications.DTO
 {

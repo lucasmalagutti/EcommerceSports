@@ -1,4 +1,4 @@
-namespace EcommerceSports.Models
+namespace EcommerceSports.Models.Entity
 {
     public class ErrorViewModel
     {

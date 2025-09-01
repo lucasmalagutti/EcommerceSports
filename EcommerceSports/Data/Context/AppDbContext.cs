@@ -1,6 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using EcommerceSports.Models;
+using EcommerceSports.Models.Entity;
 
 
 

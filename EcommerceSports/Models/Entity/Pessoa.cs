@@ -1,6 +1,6 @@
-﻿using CrudCliente.Domain.Enumerators;
+﻿using EcommerceSports.Models.Enums;
 
-namespace EcommerceSports.Models
+namespace EcommerceSports.Models.Entity
 {
     public class Pessoa
     {
