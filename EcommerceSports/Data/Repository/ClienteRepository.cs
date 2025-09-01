@@ -20,7 +20,7 @@ namespace EcommerceSports.Data.Repository
             throw new NotImplementedException();
         }
 
-        public Task ContarClientesAtivos()
+        public Task<int> ContarClientesAtivos()
         {
             throw new NotImplementedException();
         }
@@ -30,7 +30,7 @@ namespace EcommerceSports.Data.Repository
             throw new NotImplementedException();
         }
 
-        public Task InativarCliente(int id)
+        public Task<bool> InativarCliente(int id)
         {
             throw new NotImplementedException();
         }
