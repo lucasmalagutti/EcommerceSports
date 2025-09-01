@@ -37,7 +37,24 @@ namespace EcommerceSports.Applications.Services
                     TipoResidencia = endDto.TipoResidencia
                 });
 
-                var cliente = new Cliente
+            var telefone = new Telefone
+            {
+                TipoTelefone = clientedto.TipoTelefone,
+                Ddd = clientedto.Ddd,
+                Numero = clientedto.NumeroTelefone
+            };
+
+            var cartao = new CartaoCredito
+            {
+                NumCartao = clientedto.NumCartao,
+                NomeImpresso = clientedto.NomeImpresso,
+                Cvc = clientedto.Cvc,
+                Bandeira = clientedto.Bandeira,
+                Preferencial = clientedto.Preferencial,
+            };
+
+
+            var cliente = new Cliente
             {
                 Nome = clientedto.Nome,
                 Cpf = clientedto.Cpf,
@@ -46,29 +63,18 @@ namespace EcommerceSports.Applications.Services
                 Senha = clientedto.Senha,
                 Genero = (Models.Enums.Genero)clientedto.Genero,
                 DtCadastro = System.DateTime.Now,
-                CadastroAtivo = true
+                CadastroAtivo = true,
 
+                Endereco = enderecos,
+                Telefones = new List<Telefone> { telefone },
+                Cartoes = new List<CartaoCredito> { cartao }
+                
             };
 
-                var telefone = new Telefone
-                {
-                    TipoTelefone = clientedto.TipoTelefone,
-                    Ddd = clientedto.Ddd,
-                    Numero = clientedto.NumeroTelefone
-                };
-
-                var cartao = new CartaoCredito
-                {
-                    NumCartao = clientedto.NumCartao,
-                    NomeImpresso = clientedto.NomeImpresso,
-                    Cvc = clientedto.Cvc,
-                    Bandeira = clientedto.Bandeira,
-                    Preferencial = clientedto.Preferencial,
-                };
 
             try
             {
-                _clienteRepository.CadastrarCliente(cliente, enderecos, telefone, cartao);
+                _clienteRepository.CadastrarCliente(cliente);
             }
             catch (Exception ex)
             {

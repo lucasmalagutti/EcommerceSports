@@ -13,14 +13,11 @@ namespace EcommerceSports.Data.Repository
             _context = context;
         }
 
-        public void CadastrarCliente(Cliente cliente, List<Endereco> enderecos, Telefone telefone, CartaoCredito cartao)
+        public void CadastrarCliente(Cliente cliente)
         {
             try
             {
                 _context.Clientes.Add(cliente);
-                _context.Enderecos.AddRange(enderecos);
-                _context.Telefones.Add(telefone);
-                _context.Cartoes.Add(cartao);
                 _context.SaveChanges();
             }
             catch (Exception ex) 
