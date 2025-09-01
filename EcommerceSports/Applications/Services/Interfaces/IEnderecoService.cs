@@ -1,7 +1,7 @@
 ﻿using EcommerceSports.Applications.DTO;
 using EcommerceSports.Models.Entity;
 
-namespace EcommerceSports.Services.Interfaces
+namespace EcommerceSports.Applications.Services.Interfaces
 {
     public interface IEnderecoService
     {

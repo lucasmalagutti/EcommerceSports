@@ -1,7 +1,7 @@
 ﻿using EcommerceSports.Applications.DTO;
-using EcommerceSports.Services.Interfaces;
+using EcommerceSports.Applications.Services.Interfaces;
 
-namespace EcommerceSports.Services
+namespace EcommerceSports.Applications.Services
 {
     public class CartaoService : ICartaoService
     {

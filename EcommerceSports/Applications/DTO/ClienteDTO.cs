@@ -1,4 +1,6 @@
-﻿namespace EcommerceSports.Applications.DTO
+﻿using EcommerceSports.Models.Enums;
+
+namespace EcommerceSports.Applications.DTO
 {
     public class ClienteDTO
     {
@@ -15,13 +17,13 @@
 
         public List<EnderecoDTO> Enderecos { get; set; }
 
-        public int TipoTelefone { get; set; }
+        public TipoTelefone TipoTelefone { get; set; }
         public string Ddd { get; set; }
         public string NumeroTelefone { get; set; }
         public string NumCartao { get; set; }
         public string NomeImpresso { get; set; }
         public int Cvc { get; set; }
-        public int Bandeira { get; set; }
+        public BandeiraCartao Bandeira { get; set; }
         public Boolean Preferencial { get; set; }
     }
 }

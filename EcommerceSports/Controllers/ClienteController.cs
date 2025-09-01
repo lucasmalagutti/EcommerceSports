@@ -1,5 +1,5 @@
 ﻿using EcommerceSports.Applications.DTO;
-using EcommerceSports.Services.Interfaces;
+using EcommerceSports.Applications.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceSports.Controllers
@@ -19,11 +19,11 @@ namespace EcommerceSports.Controllers
 
         [HttpPost]
         [Route("/Cadastrar/Cliente")]
-        public async Task<IActionResult> CadastrarCliente([FromBody] ClienteDTO cliente)
+        public IActionResult CadastrarCliente([FromBody] ClienteDTO cliente)
         {
             try
             {
-                await _clienteService.CadastrarCliente(cliente);
+                _clienteService.CadastrarCliente(cliente);
                 return Ok("Cliente cadastrado com sucesso!");
             }
             catch (Exception ex)

@@ -3,8 +3,8 @@ using EcommerceSports.Data.Context;
 using EcommerceSports.Data.Infra.Interfaces;
 using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Data.Repository;
-using EcommerceSports.Services.Interfaces;
-using EcommerceSports.Services;
+using EcommerceSports.Applications.Services;
+using EcommerceSports.Applications.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

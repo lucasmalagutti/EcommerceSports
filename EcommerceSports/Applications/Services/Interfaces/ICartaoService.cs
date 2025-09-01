@@ -1,6 +1,6 @@
 ﻿using EcommerceSports.Applications.DTO;
 
-namespace EcommerceSports.Services.Interfaces
+namespace EcommerceSports.Applications.Services.Interfaces
 {
     public interface ICartaoService
     {
