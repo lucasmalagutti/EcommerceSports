@@ -18,12 +18,6 @@ namespace EcommerceSports.Data.Repository
         {
             try
             {
-                // Verificar se o cliente já existe
-                var clienteExistente = _context.Clientes.FirstOrDefault(c => c.Cpf == cliente.Cpf);
-                if (clienteExistente != null)
-                {
-                    throw new Exception($"Cliente com CPF {cliente.Cpf} já está cadastrado.");
-                }
 
                 // Adicionar o cliente primeiro
                 _context.Clientes.Add(cliente);
