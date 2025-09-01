@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using EcommerceSports.Models;
 
+
+
 namespace EcommerceSports.Data.Context
 {
     public class AppDbContext : DbContext
