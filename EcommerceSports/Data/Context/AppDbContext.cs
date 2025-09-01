@@ -26,6 +26,10 @@ namespace EcommerceSports.Data.Context
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.DtCadastro).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.CadastroAtivo).HasDefaultValue(true);
+                
+                // Configurar propriedades de data para usar UTC
+                entity.Property(e => e.DtNasc).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.DtCadastro).HasColumnType("timestamp with time zone");
             });
 
             // Configuração do Endereco

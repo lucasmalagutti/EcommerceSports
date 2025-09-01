@@ -58,11 +58,11 @@ namespace EcommerceSports.Applications.Services
             {
                 Nome = clientedto.Nome,
                 Cpf = clientedto.Cpf,
-                DtNasc = clientedto.DtNasc,
+                DtNasc = DateTime.SpecifyKind(clientedto.DtNasc, DateTimeKind.Utc),
                 Email = clientedto.Email,
                 Senha = clientedto.Senha,
                 Genero = (Models.Enums.Genero)clientedto.Genero,
-                DtCadastro = System.DateTime.Now,
+                DtCadastro = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
                 CadastroAtivo = true,
 
                 Endereco = enderecos,

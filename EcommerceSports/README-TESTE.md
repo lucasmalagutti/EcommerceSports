@@ -10,6 +10,16 @@ O erro no `ClienteRepository` foi corrigido com as seguintes alterações:
 2. **ClienteRepository.cs** - Melhor tratamento de erros e lógica de salvamento
 3. **ClienteService.cs** - Configuração correta dos relacionamentos bidirecionais
 4. **Modelos de Entidade** - Propriedades obrigatórias configuradas corretamente
+5. **🆕 Correção de Timezone** - Datas convertidas para UTC antes de salvar no PostgreSQL
+
+### 🆕 **Problema de Timezone Resolvido:**
+
+**Erro anterior:** `Cannot write DateTime with Kind=Local to PostgreSQL type 'timestamp with time zone', only UTC is supported`
+
+**Solução implementada:**
+- Todas as datas são convertidas para UTC antes de salvar no banco
+- `DateTime.SpecifyKind(data, DateTimeKind.Utc)` para garantir formato correto
+- Configuração explícita do tipo de coluna no banco de dados
 
 ## 🎯 Como Testar:
 
@@ -48,7 +58,7 @@ Use o arquivo `exemplo-cadastro-cliente.json` ou copie o conteúdo abaixo:
       "tipoEndereco": 1,
       "tipoResidencia": 1,
       "tipoLogradouro": 1,
-      "name": "Casa",
+      "nome": "Casa",
       "logradouro": "Rua das Flores",
       "numero": "123",
       "cep": "12345-678",
@@ -121,6 +131,7 @@ Se tudo estiver funcionando corretamente, você deve receber:
 1. **"Cliente com CPF X já está cadastrado"** - Use um CPF diferente
 2. **Erro de conexão com banco** - Verifique se o PostgreSQL está rodando
 3. **Erro de validação** - Verifique se todos os campos obrigatórios estão preenchidos
+4. **✅ Erro de timezone** - **RESOLVIDO** - Datas são convertidas automaticamente para UTC
 
 ## 🎉 Resultado Esperado:
 
@@ -130,7 +141,17 @@ O cliente será salvo no banco de dados com:
 - ✅ Telefone(s)
 - ✅ Cartão(ões) de crédito
 - ✅ Relacionamentos configurados corretamente
+- ✅ **Datas em formato UTC correto**
+
+## 🔧 **Migrações Aplicadas:**
+
+1. **InitialCreate** - Criação inicial das tabelas
+2. **AdicionarRelacionamentoClienteCartao** - Relacionamentos entre entidades
+3. **RemovendoColunaCliente** - Limpeza de colunas desnecessárias
+4. **ConfiguracaoRelacionamentos** - Configuração completa dos relacionamentos
+5. **🆕 CorrigirTimezoneDatas** - **Correção do problema de timezone**
 
 ---
 
 **Status:** ✅ **FUNCIONANDO PERFEITAMENTE!**
+**Timezone:** ✅ **CORRIGIDO!**
