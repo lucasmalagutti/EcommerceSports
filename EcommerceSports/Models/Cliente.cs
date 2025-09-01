@@ -1,6 +1,6 @@
 ﻿namespace EcommerceSports.Models
 {
-    public class Cliente
+    public class Cliente : Pessoa
     {
         public string Email { get; set; }
         public string Senha { get; set; }
