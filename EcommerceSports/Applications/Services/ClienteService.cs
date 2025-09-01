@@ -71,15 +71,8 @@ namespace EcommerceSports.Applications.Services
                 
             };
 
-
-            try
-            {
                 _clienteRepository.CadastrarCliente(cliente);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
+
         }
 
 

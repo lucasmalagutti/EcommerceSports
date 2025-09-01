@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcommerceSports.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250901212123_RemovendoColunaCliente")]
+    [Migration("20250901222158_RemovendoColunaCliente")]
     partial class RemovendoColunaCliente
     {
         /// <inheritdoc />
