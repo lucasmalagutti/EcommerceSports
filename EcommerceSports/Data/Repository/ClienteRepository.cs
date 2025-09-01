@@ -70,5 +70,11 @@ namespace EcommerceSports.Data.Repository
         {
             throw new NotImplementedException();
         }
+        public async Task CadastrarCliente(Cliente cliente)
+        {
+            await _context.Clientes.AddAsync(cliente);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

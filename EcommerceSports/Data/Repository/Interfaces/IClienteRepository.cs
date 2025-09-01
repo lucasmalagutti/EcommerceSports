@@ -13,6 +13,8 @@ namespace EcommerceSports.Data.Infra.Interfaces
         Task<int> ContarClientesAtivos();
         Task<IEnumerable<Endereco>> ListarEnderecosCliente(int clienteId);
         Task<IEnumerable<CartaoCredito>> ListarCartoesCliente(int clienteId);
+        Task CadastrarCliente(Cliente cliente);
+
 
     }
 }

@@ -42,13 +42,15 @@ namespace EcommerceSports.Services
                 Senha = clientedto.Senha,
                 Genero = (Models.Enums.Genero)clientedto.Genero,
                 DtCadastro = System.DateTime.Now,
-                CadastroAtivo = true
+                CadastroAtivo = true,
+                Endereco = new List<Endereco>(),
+                Telefones = new List<Telefone>(), 
+                Cartoes = new List<CartaoCredito>() 
             };
 
-            var enderecos = new List<Endereco>();
             foreach (var endDto in clientedto.Enderecos)
             {
-                enderecos.Add(new Endereco
+                cliente.Endereco.Add(new Endereco
                 {
                     Bairro = endDto.Bairro,
                     Cep = endDto.Cep,
@@ -65,23 +67,23 @@ namespace EcommerceSports.Services
                 });
             }
 
-            var telefone = new Telefone
+            cliente.Telefones.Add(new Telefone
             {
                 TipoTelefone = (Models.Enums.TipoTelefone)clientedto.TipoTelefone,
                 Ddd = clientedto.Ddd,
                 Numero = clientedto.NumeroTelefone
-            };
+            });
 
-            var cartao = new CartaoCredito
+            cliente.Cartoes.Add(new CartaoCredito
             {
                 NumCartao = clientedto.NumCartao,
                 NomeImpresso = clientedto.NomeImpresso,
                 Cvc = clientedto.Cvc,
                 Bandeira = (Models.Enums.BandeiraCartao)clientedto.Bandeira,
                 Preferencial = clientedto.Preferencial
-            };
+            });
 
-            await _clienteRepository.CadastrarCliente(cliente, enderecos, telefone, cartao);
+            await _clienteRepository.CadastrarCliente(cliente);
         }
 
         public Task<int> ContarClientesAtivos()
