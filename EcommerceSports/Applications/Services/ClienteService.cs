@@ -71,10 +71,16 @@ namespace EcommerceSports.Applications.Services
                 
             };
 
-                _clienteRepository.CadastrarCliente(cliente);
+            // Configurar os relacionamentos bidirecionais
+            foreach (var endereco in enderecos)
+            {
+                endereco.Cliente = cliente;
+            }
+            
+            telefone.Cliente = cliente;
+            cartao.Cliente = cliente;
 
+            _clienteRepository.CadastrarCliente(cliente);
         }
-
-
     }
 }

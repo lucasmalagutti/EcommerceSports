@@ -1,0 +1,37 @@
+{
+  "id": 0,
+  "nome": "João Silva",
+  "cpf": "12345678901",
+  "dtNasc": "1990-01-01T00:00:00.000Z",
+  "email": "joao.silva@email.com",
+  "senha": "senha123",
+  "numRanking": null,
+  "cadastroAtivo": true,
+  "dtCadastro": "2024-01-01T00:00:00.000Z",
+  "genero": 1,
+  "enderecos": [
+    {
+      "id": 0,
+      "tipoEndereco": 1,
+      "tipoResidencia": 1,
+      "tipoLogradouro": 1,
+      "nome": "Casa",
+      "logradouro": "Rua das Flores",
+      "numero": "123",
+      "cep": "12345-678",
+      "bairro": "Centro",
+      "cidade": "São Paulo",
+      "estado": "SP",
+      "pais": "Brasil",
+      "observacoes": "Próximo ao shopping"
+    }
+  ],
+  "tipoTelefone": 2,
+  "ddd": "11",
+  "numeroTelefone": "99999-9999",
+  "numCartao": "4111111111111111",
+  "nomeImpresso": "JOAO SILVA",
+  "cvc": 123,
+  "bandeira": 1,
+  "preferencial": true
+}
