@@ -28,6 +28,19 @@ namespace EcommerceSports.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPut("{id}/AlterarStatus")]
+        public async Task<IActionResult> AtualizarStatus(int id, [FromBody] EditarStatusClienteDTO status)
+        {
+            try
+            {
+                await _clienteService.AtualizarStatusCliente(id, status);
+                return Ok("Status atualizado com sucesso!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { erro = ex.Message });
+            }
+        }
 
         [HttpPut("{id}/AlterarSenha")]
         public async Task<IActionResult> AtualizarSenha(int id, [FromBody] EditarSenhaDTO senha)

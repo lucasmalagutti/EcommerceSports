@@ -52,6 +52,18 @@ namespace EcommerceSports.Applications.Services
             await _clienteRepository.AtualizarCliente(cliente);
         }
 
+        public async Task AtualizarStatusCliente(int id, EditarStatusClienteDTO status)
+        {
+            var cliente = await _clienteRepository.BuscarPorId(id);
+
+            if (cliente == null)
+                throw new Exception("Cliente não existe.");
+
+            cliente.CadastroAtivo = status.CadastroAtivo;
+
+            await _clienteRepository.AtualizarCliente(cliente);
+        }
+
         public void CadastrarCliente(ClienteDTO clientedto)
         {
             var enderecos = new List<Endereco>();

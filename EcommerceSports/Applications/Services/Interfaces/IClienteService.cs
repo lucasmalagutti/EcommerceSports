@@ -9,5 +9,6 @@ namespace EcommerceSports.Applications.Services.Interfaces
         Task AtualizarCliente(int id, EditarClienteDTO cliente);
 
         Task AtualizarSenha(int id, EditarSenhaDTO senha);
+        Task AtualizarStatusCliente(int id, EditarStatusClienteDTO status);
     }
 }
