@@ -15,6 +15,19 @@ namespace EcommerceSports.Controllers
             _clienteService = clienteService;
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AtualizarCliente(int id, [FromBody] EditarClienteDTO cliente)
+        {
+            try
+            {
+                await _clienteService.AtualizarCliente(id, cliente);
+                return Ok("Cliente atualizado com sucesso!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
         [HttpPost]

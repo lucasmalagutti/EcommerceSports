@@ -13,7 +13,7 @@ namespace EcommerceSports.Applications.DTO
         public int? NumRanking { get; set; }
         public bool CadastroAtivo { get; set; }
         public DateTime DtCadastro { get; set; }
-        public int Genero { get; set; }
+        public Genero Genero { get; set; }
 
         public List<EnderecoDTO> Enderecos { get; set; }
 

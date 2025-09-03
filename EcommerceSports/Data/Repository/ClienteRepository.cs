@@ -14,6 +14,28 @@ namespace EcommerceSports.Data.Repository
             _context = context;
         }
 
+        public async Task<Cliente?> BuscarPorId(int id)
+        {
+            return await _context.Clientes
+            .Include(c => c.Endereco)
+            .Include(c => c.Telefones)
+            .Include(c => c.Cartoes)
+            .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task AtualizarCliente(Cliente cliente)
+        {
+            try
+            {
+                _context.Clientes.Update(cliente);
+                await _context.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Erro ao atualizar cliente", ex);
+            }
+        }
+
         public void CadastrarCliente(Cliente cliente)
         {
             try

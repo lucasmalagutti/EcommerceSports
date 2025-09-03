@@ -2,9 +2,6 @@
 using EcommerceSports.Applications.Services.Interfaces;
 using EcommerceSports.Data.Infra.Interfaces;
 using EcommerceSports.Models.Entity;
-using System.Collections.Generic;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
 
 namespace EcommerceSports.Applications.Services
 {
@@ -15,6 +12,27 @@ namespace EcommerceSports.Applications.Services
         public ClienteService(IClienteRepository clienteRepository)
         {
             _clienteRepository = clienteRepository;
+        }
+
+        public async Task AtualizarCliente(int id, EditarClienteDTO clientedto)
+        {
+            var clienteExistente = await _clienteRepository.BuscarPorId(id);
+
+            if (clienteExistente == null)
+                throw new Exception("Cliente não encontrado.");
+
+            clienteExistente.Nome = clientedto.Nome;
+            clienteExistente.DtNasc = clientedto.DtNascimento ?? clienteExistente.DtNasc;
+            clienteExistente.Cpf = clientedto.Cpf;
+            clienteExistente.Email = clientedto.Email;
+            clienteExistente.Genero = clientedto.Genero ?? clienteExistente.Genero;
+
+            var telefone = clienteExistente.Telefones.First();
+            telefone.TipoTelefone = clientedto.TipoTelefone;
+            telefone.Ddd = clientedto.Ddd;
+            telefone.Numero = clientedto.NumeroTelefone;
+
+            await _clienteRepository.AtualizarCliente(clienteExistente);
         }
 
         public void CadastrarCliente(ClienteDTO clientedto)
