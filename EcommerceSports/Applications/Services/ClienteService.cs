@@ -35,6 +35,23 @@ namespace EcommerceSports.Applications.Services
             await _clienteRepository.AtualizarCliente(clienteExistente);
         }
 
+        public async Task AtualizarSenha(int id, EditarSenhaDTO senha)
+        {
+            var cliente = await _clienteRepository.BuscarPorId(id);
+
+            if (cliente == null)
+                throw new Exception("Cliente não existe.");
+
+            if (cliente.Senha != senha.SenhaAtual)
+                throw new Exception("Senha atual incorreta.");
+
+            if (senha.NovaSenha != senha.ConfirmarNovaSenha)
+                throw new Exception("A nova senha e a confirmação não coincidem.");
+
+            cliente.Senha = senha.NovaSenha;
+            await _clienteRepository.AtualizarCliente(cliente);
+        }
+
         public void CadastrarCliente(ClienteDTO clientedto)
         {
             var enderecos = new List<Endereco>();

@@ -29,6 +29,19 @@ namespace EcommerceSports.Controllers
             }
         }
 
+        [HttpPut("{id}/AlterarSenha")]
+        public async Task<IActionResult> AtualizarSenha(int id, [FromBody] EditarSenhaDTO senha)
+        {
+            try
+            {
+                await _clienteService.AtualizarSenha(id, senha);
+                return Ok("Senha atualizada com sucesso!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { erro = ex.Message });
+            }
+        }
 
         [HttpPost]
         [Route("/Cadastrar/Cliente")]

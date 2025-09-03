@@ -87,6 +87,8 @@ namespace EcommerceSports.Data.Repository
                 throw new Exception($"Erro ao cadastrar cliente e dados relacionados: {ex.Message}", ex);
             }
         }
+    
+        
     }
 }
 
