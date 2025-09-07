@@ -36,7 +36,7 @@ namespace EcommerceSports.Data.Repository
             }
         }
 
-        public void CadastrarCliente(Cliente cliente)
+        public async Task CadastrarCliente(Cliente cliente)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace EcommerceSports.Data.Repository
                 }
                 
                 // Salvar novamente para persistir as entidades relacionadas
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateException dbEx)
             {

@@ -64,7 +64,7 @@ namespace EcommerceSports.Applications.Services
             await _clienteRepository.AtualizarCliente(cliente);
         }
 
-        public void CadastrarCliente(ClienteDTO clientedto)
+        public async Task CadastrarCliente(ClienteDTO clientedto)
         {
             var enderecos = new List<Endereco>();
             foreach (var endDto in clientedto.Enderecos)
@@ -127,7 +127,7 @@ namespace EcommerceSports.Applications.Services
             telefone.Cliente = cliente;
             cartao.Cliente = cliente;
 
-            _clienteRepository.CadastrarCliente(cliente);
+           await _clienteRepository.CadastrarCliente(cliente);
         }
     }
 }
