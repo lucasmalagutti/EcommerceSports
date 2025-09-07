@@ -34,7 +34,7 @@ namespace EcommerceSports.Controllers
         }
 
         [HttpGet]
-        [Route("Listar/{clienteId}")]
+        [Route("/Cartao/Listar/{clienteId}")]
         public async Task<IActionResult> ListarCartoesPorCliente(int clienteId)
         {
             try
