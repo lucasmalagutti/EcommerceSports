@@ -21,26 +21,6 @@ namespace EcommerceSports.Data.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task EditarEndereco(int id, Endereco endereco)
-        {
-            var enderecoExistente = await _context.Enderecos.FindAsync(id);
-            if (enderecoExistente != null)
-            {
-                enderecoExistente.TipoEndereco = endereco.TipoEndereco;
-                enderecoExistente.TipoResidencia = endereco.TipoResidencia;
-                enderecoExistente.TipoLogradouro = endereco.TipoLogradouro;
-                enderecoExistente.Nome = endereco.Nome;
-                enderecoExistente.Logradouro = endereco.Logradouro;
-                enderecoExistente.Numero = endereco.Numero;
-                enderecoExistente.Cep = endereco.Cep;
-                enderecoExistente.Bairro = endereco.Bairro;
-                enderecoExistente.Cidade = endereco.Cidade;
-                enderecoExistente.Estado = endereco.Estado;
-                enderecoExistente.Pais = endereco.Pais;
-                enderecoExistente.Observacoes = endereco.Observacoes;
 
-                await _context.SaveChangesAsync();
-            }
-        }
     }
 }
