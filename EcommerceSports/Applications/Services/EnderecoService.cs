@@ -39,21 +39,28 @@ namespace EcommerceSports.Applications.Services
 
         public async Task EditarEndereco(int id, EditarEnderecoDTO enderecoDTO)
         {
+            // Busca o endereço existente para manter os valores atuais dos enums
+            var enderecoExistente = await _enderecoRepository.BuscarEnderecoPorId(id);
+            if (enderecoExistente == null)
+            {
+                throw new ArgumentException("Endereço não encontrado");
+            }
+
             var endereco = new Endereco
             {
                 Id = id,
-                TipoEndereco = TipoEndereco.Cobranca, // Valor padrão, pois não está no DTO
-                TipoResidencia = enderecoDTO.TipoResidencia.HasValue ? (TipoResidencia)enderecoDTO.TipoResidencia.Value : TipoResidencia.Casa,
-                TipoLogradouro = enderecoDTO.TipoLogradouro.HasValue ? (TipoLogradouro)enderecoDTO.TipoLogradouro.Value : TipoLogradouro.Rua,
-                Nome = enderecoDTO.Nome ?? string.Empty,
-                Logradouro = enderecoDTO.Logradouro ?? string.Empty,
-                Numero = enderecoDTO.Numero ?? string.Empty,
-                Cep = enderecoDTO.Cep ?? string.Empty,
-                Bairro = enderecoDTO.Bairro ?? string.Empty,
-                Cidade = enderecoDTO.Cidade ?? string.Empty,
-                Estado = enderecoDTO.Estado ?? string.Empty,
-                Pais = enderecoDTO.Pais ?? string.Empty,
-                Observacoes = enderecoDTO.Observacoes
+                TipoEndereco = enderecoExistente.TipoEndereco, // Mantém o valor atual
+                TipoResidencia = enderecoDTO.TipoResidencia.HasValue ? (TipoResidencia)enderecoDTO.TipoResidencia.Value : enderecoExistente.TipoResidencia,
+                TipoLogradouro = enderecoDTO.TipoLogradouro.HasValue ? (TipoLogradouro)enderecoDTO.TipoLogradouro.Value : enderecoExistente.TipoLogradouro,
+                Nome = enderecoDTO.Nome ?? enderecoExistente.Nome,
+                Logradouro = enderecoDTO.Logradouro ?? enderecoExistente.Logradouro,
+                Numero = enderecoDTO.Numero ?? enderecoExistente.Numero,
+                Cep = enderecoDTO.Cep ?? enderecoExistente.Cep,
+                Bairro = enderecoDTO.Bairro ?? enderecoExistente.Bairro,
+                Cidade = enderecoDTO.Cidade ?? enderecoExistente.Cidade,
+                Estado = enderecoDTO.Estado ?? enderecoExistente.Estado,
+                Pais = enderecoDTO.Pais ?? enderecoExistente.Pais,
+                Observacoes = enderecoDTO.Observacoes ?? enderecoExistente.Observacoes
             };
 
             await _enderecoRepository.EditarEndereco(id, endereco);
