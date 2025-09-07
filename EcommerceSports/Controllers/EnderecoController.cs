@@ -50,5 +50,20 @@ namespace EcommerceSports.Controllers
                 return StatusCode(500, new { message = "Erro interno do servidor", error = ex.Message });
             }
         }
+
+        [HttpGet]
+        [Route("cliente/{clienteId}")]
+        public async Task<IActionResult> ListarEnderecosPorCliente(int clienteId)
+        {
+            try
+            {
+                var enderecos = await _enderecoService.ListarEnderecosPorCliente(clienteId);
+                return Ok(enderecos);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { erro = "Erro interno do servidor. Tente novamente mais tarde." });
+            }
+        }
     }
 }
