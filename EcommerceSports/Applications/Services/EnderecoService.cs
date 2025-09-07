@@ -39,13 +39,7 @@ namespace EcommerceSports.Applications.Services
 
         public async Task EditarEndereco(int id, EditarEnderecoDTO enderecoDTO)
         {
-            // Busca o endereço existente para manter os valores atuais dos enums
             var enderecoExistente = await _enderecoRepository.BuscarEnderecoPorId(id);
-            if (enderecoExistente == null)
-            {
-                throw new ArgumentException("Endereço não encontrado");
-            }
-
             var endereco = new Endereco
             {
                 Id = id,
@@ -68,7 +62,6 @@ namespace EcommerceSports.Applications.Services
 
         public async Task ValidarEndereco(IEnumerable<Endereco> enderecos)
         {
-            // Implementar validações de negócio se necessário
             await Task.CompletedTask;
         }
     }

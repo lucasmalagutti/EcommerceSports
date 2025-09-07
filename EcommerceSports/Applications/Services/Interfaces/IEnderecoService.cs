@@ -7,5 +7,7 @@ namespace EcommerceSports.Applications.Services.Interfaces
     {
         Task CadastrarEndereco(int id, EnderecoDTO endereco);
         Task ValidarEndereco(IEnumerable<Endereco> enderecos);
+        Task EditarEndereco(int id, EditarEnderecoDTO endereco);
+
     }
 }

@@ -52,31 +52,6 @@ namespace EcommerceSports.Controllers
         {
             try
             {
-                if (enderecoDTO == null)
-                {
-                    return BadRequest(new { message = "Dados do endereço são obrigatórios" });
-                }
-
-                if (enderecoId <= 0)
-                {
-                    return BadRequest(new { message = "ID do endereço deve ser maior que zero" });
-                }
-
-                // Verifica se pelo menos um campo foi fornecido para atualização
-                if (string.IsNullOrWhiteSpace(enderecoDTO.Nome) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Logradouro) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Numero) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Cep) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Bairro) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Cidade) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Estado) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Pais) &&
-                    string.IsNullOrWhiteSpace(enderecoDTO.Observacoes) &&
-                    !enderecoDTO.TipoLogradouro.HasValue &&
-                    !enderecoDTO.TipoResidencia.HasValue)
-                {
-                    return BadRequest(new { message = "Pelo menos um campo deve ser fornecido para atualização" });
-                }
 
                 await _enderecoService.EditarEndereco(enderecoId, enderecoDTO);
 

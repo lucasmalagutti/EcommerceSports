@@ -31,7 +31,6 @@ namespace EcommerceSports.Data.Repository
             var enderecoExistente = await _context.Enderecos.FindAsync(id);
             if (enderecoExistente != null)
             {
-                // Atualiza apenas os campos que foram fornecidos (não nulos)
                 if (!string.IsNullOrEmpty(endereco.Nome))
                     enderecoExistente.Nome = endereco.Nome;
                 
@@ -59,7 +58,6 @@ namespace EcommerceSports.Data.Repository
                 if (endereco.Observacoes != null)
                     enderecoExistente.Observacoes = endereco.Observacoes;
 
-                // Atualiza os enums se foram fornecidos
                 enderecoExistente.TipoResidencia = endereco.TipoResidencia;
                 enderecoExistente.TipoLogradouro = endereco.TipoLogradouro;
 
