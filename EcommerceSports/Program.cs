@@ -22,6 +22,8 @@ builder.Services.AddScoped<IEnderecoRepository, EnderecoRepository>();
 builder.Services.AddScoped<ICartaoService, CartaoService>();
 builder.Services.AddScoped<ICartaoRepository, CartaoRepository>();
 builder.Services.AddScoped<ITelefoneRepository, TelefoneRepository>();
+builder.Services.AddScoped<IValidators, Validators>();
+
 
 builder.Services.AddCors(options =>
 {

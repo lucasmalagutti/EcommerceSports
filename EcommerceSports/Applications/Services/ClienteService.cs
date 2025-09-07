@@ -8,10 +8,11 @@ namespace EcommerceSports.Applications.Services
     public class ClienteService : IClienteService
     {
         private readonly IClienteRepository _clienteRepository;
-
-        public ClienteService(IClienteRepository clienteRepository)
+        private readonly IValidators _validators;
+        public ClienteService(IClienteRepository clienteRepository, IValidators validators)
         {
             _clienteRepository = clienteRepository;
+            _validators = validators;
         }
 
         public async Task AtualizarCliente(int id, EditarClienteDTO clientedto)
@@ -48,6 +49,7 @@ namespace EcommerceSports.Applications.Services
             if (senha.NovaSenha != senha.ConfirmarNovaSenha)
                 throw new Exception("A nova senha e a confirmação não coincidem.");
 
+            _validators.ValidarSenha(senha.NovaSenha);
             cliente.Senha = senha.NovaSenha;
             await _clienteRepository.AtualizarCliente(cliente);
         }
@@ -126,6 +128,8 @@ namespace EcommerceSports.Applications.Services
             
             telefone.Cliente = cliente;
             cartao.Cliente = cliente;
+
+            _validators.ValidarSenha(cliente.Senha);
 
            await _clienteRepository.CadastrarCliente(cliente);
         }
