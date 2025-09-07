@@ -1,13 +1,32 @@
-﻿using EcommerceSports.Data.Repository.Interfaces;
+﻿using EcommerceSports.Data.Context;
+using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceSports.Data.Repository
 {
     public class CartaoRepository : ICartaoRepository
     {
-        public Task CadastrarCartao(int id, CartaoCredito cartao)
+        private readonly AppDbContext _context;
+
+        public CartaoRepository(AppDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
         }
+
+        public async Task<CartaoCredito> CadastrarCartao(CartaoCredito cartao)
+        {
+            _context.Cartoes.Add(cartao);
+            await _context.SaveChangesAsync();
+            return cartao;
+        }
+
+        public async Task<List<CartaoCredito>> ListarCartoesPorCliente(int clienteId)
+        {
+            return await _context.Cartoes
+                .Where(c => c.ClienteId == clienteId)
+                .ToListAsync();
+        }
+
     }
 }

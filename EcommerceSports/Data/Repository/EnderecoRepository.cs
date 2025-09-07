@@ -64,5 +64,12 @@ namespace EcommerceSports.Data.Repository
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<Endereco>> ListarEnderecosPorCliente(int clienteId)
+        {
+            return await _context.Enderecos
+                .Where(e => e.ClienteId == clienteId)
+                .ToListAsync();
+        }
     }
 }

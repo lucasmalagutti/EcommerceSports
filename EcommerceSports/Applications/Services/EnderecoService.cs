@@ -64,5 +64,28 @@ namespace EcommerceSports.Applications.Services
         {
             await Task.CompletedTask;
         }
+
+        public async Task<List<ResponseEnderecoDTO>> ListarEnderecosPorCliente(int clienteId)
+        {
+            var enderecos = await _enderecoRepository.ListarEnderecosPorCliente(clienteId);
+            
+            return enderecos.Select(e => new ResponseEnderecoDTO
+            {
+                Id = e.Id,
+                Nome = e.Nome,
+                TipoEndereco = e.TipoEndereco,
+                TipoResidencia = e.TipoResidencia,
+                TipoLogradouro = e.TipoLogradouro,
+                Logradouro = e.Logradouro,
+                Numero = e.Numero,
+                Cep = e.Cep,
+                Bairro = e.Bairro,
+                Cidade = e.Cidade,
+                Estado = e.Estado,
+                Pais = e.Pais,
+                Observacoes = e.Observacoes,
+                ClienteId = e.ClienteId
+            }).ToList();
+        }
     }
 }

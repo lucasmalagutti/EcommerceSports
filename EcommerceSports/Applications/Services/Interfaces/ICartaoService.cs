@@ -4,6 +4,7 @@ namespace EcommerceSports.Applications.Services.Interfaces
 {
     public interface ICartaoService
     {
-        Task CadastrarCartao(int id, CartaoDTO cartao);
+        Task<ResponseCartaoDTO> CadastrarCartao(int clienteId, CadastrarCartaoDTO cartao);
+        Task<List<ResponseCartaoDTO>> ListarCartoesPorCliente(int clienteId);
     }
 }
