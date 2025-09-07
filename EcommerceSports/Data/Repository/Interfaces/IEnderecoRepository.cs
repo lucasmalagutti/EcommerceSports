@@ -6,6 +6,5 @@ namespace EcommerceSports.Data.Repository.Interfaces
     {
         Task CadastrarEndereco(int id, Endereco endereco);
         Task EditarEndereco(int id, Endereco endereco);
-        Task AdicionarEndereco(int clienteId, Endereco endereco);
     }
 }
