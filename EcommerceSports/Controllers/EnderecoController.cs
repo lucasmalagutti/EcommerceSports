@@ -52,7 +52,7 @@ namespace EcommerceSports.Controllers
         }
 
         [HttpGet]
-        [Route("cliente/{clienteId}")]
+        [Route("Listar/{clienteId}")]
         public async Task<IActionResult> ListarEnderecosPorCliente(int clienteId)
         {
             try

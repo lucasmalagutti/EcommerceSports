@@ -16,7 +16,7 @@ namespace EcommerceSports.Controllers
         }
 
         [HttpPost]
-        [Route("/Cadastrar/Cartao/{clienteId}")]
+        [Route("/Cartao/Cadastrar/{clienteId}")]
         public async Task<IActionResult> CadastrarCartao(int clienteId, [FromBody] CadastrarCartaoDTO cartao)
         {
             try
@@ -34,7 +34,7 @@ namespace EcommerceSports.Controllers
         }
 
         [HttpGet]
-        [Route("cliente/{clienteId}")]
+        [Route("Listar/{clienteId}")]
         public async Task<IActionResult> ListarCartoesPorCliente(int clienteId)
         {
             try
