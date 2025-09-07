@@ -25,7 +25,10 @@ Todo cartão de crédito deve ser de alguma bandeira registrada no sistema:
 ## Endpoints Disponíveis
 
 ### 1. Cadastrar Cartão
-**POST** `/api/Cartao/Cadastrar/Cartao`
+**POST** `/api/Cartao/Cadastrar/Cartao/{clienteId}`
+
+**Parâmetros da URL:**
+- `clienteId` (int): ID do cliente
 
 **Body:**
 ```json
@@ -34,7 +37,6 @@ Todo cartão de crédito deve ser de alguma bandeira registrada no sistema:
   "nomeImpresso": "JOAO DA SILVA",
   "bandeira": 1,
   "cvc": 123,
-  "clienteId": 1,
   "preferencial": true
 }
 ```
@@ -92,27 +94,9 @@ Todo cartão de crédito deve ser de alguma bandeira registrada no sistema:
 
 ## Validações Implementadas
 
-### Validações de Entrada
-- **Número do Cartão**: Obrigatório, 13-19 caracteres, apenas dígitos
-- **Nome Impresso**: Obrigatório, 2-50 caracteres
-- **Bandeira**: Obrigatória, deve ser uma das bandeiras permitidas (1-6)
-- **CVC**: Obrigatório, 3 dígitos (4 para American Express)
-- **ClienteId**: Obrigatório
-
-### Validações de Negócio
-- **Bandeira Válida**: Verifica se a bandeira está na lista permitida (RN0025)
-- **Formato do Número**: Valida se o número contém apenas dígitos
-- **CVC por Bandeira**: American Express usa 4 dígitos, outras usam 3
-- **Cartão Único**: Não permite cadastrar o mesmo número de cartão para o mesmo cliente
+**Nota**: Todas as validações foram removidas conforme solicitado. O fluxo agora aceita qualquer valor nos campos sem validação.
 
 ## Códigos de Erro
-
-### 400 - Bad Request
-- Dados de entrada inválidos
-- Bandeira não permitida
-- Formato de número de cartão inválido
-- CVC inválido para a bandeira
-- Cartão já cadastrado para o cliente
 
 ### 404 - Not Found
 - Cartão não encontrado
@@ -124,14 +108,13 @@ Todo cartão de crédito deve ser de alguma bandeira registrada no sistema:
 
 ```bash
 # Cadastrar um cartão
-curl -X POST "https://localhost:7000/api/Cartao/Cadastrar/Cartao" \
+curl -X POST "https://localhost:7000/api/Cartao/Cadastrar/Cartao/1" \
   -H "Content-Type: application/json" \
   -d '{
     "numCartao": "4532 1234 5678 9012",
     "nomeImpresso": "JOAO DA SILVA",
     "bandeira": 1,
     "cvc": 123,
-    "clienteId": 1,
     "preferencial": true
   }'
 

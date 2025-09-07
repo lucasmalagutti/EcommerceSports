@@ -7,6 +7,5 @@ namespace EcommerceSports.Data.Repository.Interfaces
         Task<CartaoCredito> CadastrarCartao(CartaoCredito cartao);
         Task<List<CartaoCredito>> ListarCartoesPorCliente(int clienteId);
         Task<CartaoCredito?> ObterCartaoPorId(int cartaoId);
-        Task<bool> ExisteCartaoComNumero(string numCartao, int clienteId);
     }
 }

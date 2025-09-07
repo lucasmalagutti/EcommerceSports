@@ -16,25 +16,16 @@ namespace EcommerceSports.Controllers
         }
 
         [HttpPost]
-        [Route("/Cadastrar/Cartao")]
-        public async Task<IActionResult> CadastrarCartao([FromBody] CadastrarCartaoDTO cartao)
+        [Route("/Cadastrar/Cartao/{clienteId}")]
+        public async Task<IActionResult> CadastrarCartao(int clienteId, [FromBody] CadastrarCartaoDTO cartao)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var cartaoCadastrado = await _cartaoService.CadastrarCartao(cartao);
+                var cartaoCadastrado = await _cartaoService.CadastrarCartao(clienteId, cartao);
                 return Ok(new { 
                     mensagem = "Cartão cadastrado com sucesso!", 
                     cartao = cartaoCadastrado 
                 });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { erro = ex.Message });
             }
             catch (Exception)
             {

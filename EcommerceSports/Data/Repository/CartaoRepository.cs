@@ -33,11 +33,5 @@ namespace EcommerceSports.Data.Repository
             return await _context.Cartoes
                 .FirstOrDefaultAsync(c => c.Id == cartaoId);
         }
-
-        public async Task<bool> ExisteCartaoComNumero(string numCartao, int clienteId)
-        {
-            return await _context.Cartoes
-                .AnyAsync(c => c.NumCartao == numCartao && c.ClienteId == clienteId);
-        }
     }
 }

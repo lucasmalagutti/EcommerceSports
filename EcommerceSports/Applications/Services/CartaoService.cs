@@ -2,7 +2,6 @@
 using EcommerceSports.Applications.Services.Interfaces;
 using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
-using EcommerceSports.Models.Enums;
 
 namespace EcommerceSports.Applications.Services
 {
@@ -15,18 +14,8 @@ namespace EcommerceSports.Applications.Services
             _cartaoRepository = cartaoRepository;
         }
 
-        public async Task<ResponseCartaoDTO> CadastrarCartao(CadastrarCartaoDTO cartao)
+        public async Task<ResponseCartaoDTO> CadastrarCartao(int clienteId, CadastrarCartaoDTO cartao)
         {
-            // Validações de negócio
-            await ValidarCartao(cartao);
-
-            // Verificar se já existe cartão com o mesmo número para o cliente
-            var cartaoExistente = await _cartaoRepository.ExisteCartaoComNumero(cartao.NumCartao, cartao.ClienteId);
-            if (cartaoExistente)
-            {
-                throw new ArgumentException("Já existe um cartão com este número cadastrado para este cliente.");
-            }
-
             // Criar entidade
             var cartaoCredito = new CartaoCredito
             {
@@ -34,7 +23,7 @@ namespace EcommerceSports.Applications.Services
                 NomeImpresso = cartao.NomeImpresso,
                 Bandeira = cartao.Bandeira,
                 Cvc = cartao.Cvc,
-                ClienteId = cartao.ClienteId,
+                ClienteId = clienteId,
                 Preferencial = cartao.Preferencial
             };
 
@@ -84,58 +73,6 @@ namespace EcommerceSports.Applications.Services
                 Preferencial = cartao.Preferencial,
                 ClienteId = cartao.ClienteId
             };
-        }
-
-        public Task<bool> ValidarBandeiraCartao(int bandeira)
-        {
-            return Task.FromResult(Enum.IsDefined(typeof(BandeiraCartao), bandeira));
-        }
-
-        private async Task ValidarCartao(CadastrarCartaoDTO cartao)
-        {
-            // Validar bandeira (RN0025)
-            if (!await ValidarBandeiraCartao((int)cartao.Bandeira))
-            {
-                throw new ArgumentException("Bandeira de cartão inválida. Bandeiras permitidas: Visa, Mastercard, American Express, Elo, HiperCard, Aura.");
-            }
-
-            // Validar formato do número do cartão
-            if (!ValidarFormatoNumeroCartao(cartao.NumCartao))
-            {
-                throw new ArgumentException("Formato do número do cartão inválido.");
-            }
-
-            // Validar CVC baseado na bandeira
-            if (!ValidarCvc(cartao.Cvc, cartao.Bandeira))
-            {
-                throw new ArgumentException("CVC inválido para a bandeira do cartão.");
-            }
-        }
-
-        private bool ValidarFormatoNumeroCartao(string numCartao)
-        {
-            // Remove espaços e hífens
-            var numeroLimpo = numCartao.Replace(" ", "").Replace("-", "");
-            
-            // Verifica se contém apenas dígitos
-            if (!numeroLimpo.All(char.IsDigit))
-                return false;
-
-            // Verifica comprimento baseado na bandeira (implementação básica)
-            return numeroLimpo.Length >= 13 && numeroLimpo.Length <= 19;
-        }
-
-        private bool ValidarCvc(int cvc, BandeiraCartao bandeira)
-        {
-            // American Express usa 4 dígitos, outras bandeiras usam 3
-            if (bandeira == BandeiraCartao.AmericanExpress)
-            {
-                return cvc >= 1000 && cvc <= 9999;
-            }
-            else
-            {
-                return cvc >= 100 && cvc <= 999;
-            }
         }
     }
 }
