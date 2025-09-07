@@ -22,6 +22,9 @@ namespace EcommerceSports.Applications.Services
             if (clienteExistente == null)
                 throw new Exception("Cliente não encontrado.");
 
+            // Validar se o CPF já existe (excluindo o próprio cliente)
+            await _validators.ValidarCpfExistente(clientedto.Cpf, id);
+
             clienteExistente.Nome = clientedto.Nome;
             clienteExistente.DtNasc = clientedto.DtNascimento ?? clienteExistente.DtNasc;
             clienteExistente.Cpf = clientedto.Cpf;
@@ -131,6 +134,7 @@ namespace EcommerceSports.Applications.Services
 
             _validators.ValidarSenha(cliente.Senha);
             _validators.ValidarEnderecos(cliente.Endereco);
+            await _validators.ValidarCpfExistente(cliente.Cpf);
 
            await _clienteRepository.CadastrarCliente(cliente);
         }

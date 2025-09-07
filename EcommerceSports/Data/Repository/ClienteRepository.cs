@@ -23,6 +23,15 @@ namespace EcommerceSports.Data.Repository
             .FirstOrDefaultAsync(c => c.Id == id);
         }
 
+        public async Task<Cliente?> BuscarPorCpf(string cpf)
+        {
+            return await _context.Clientes
+            .Include(c => c.Endereco)
+            .Include(c => c.Telefones)
+            .Include(c => c.Cartoes)
+            .FirstOrDefaultAsync(c => c.Cpf == cpf);
+        }
+
         public async Task AtualizarCliente(Cliente cliente)
         {
             try

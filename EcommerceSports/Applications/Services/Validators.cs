@@ -60,5 +60,26 @@ namespace EcommerceSports.Applications.Services
             }
         }
 
+        public async Task ValidarCpfExistente(string cpf, int? clienteId = null)
+        {
+            if (string.IsNullOrEmpty(cpf))
+            {
+                throw new Exception("CPF não pode ser vazio.");
+            }
+
+            var clienteExistente = await _clienteRepository.BuscarPorCpf(cpf);
+
+            if (clienteExistente != null)
+            {
+                // Se estamos editando um cliente, permitir que ele mantenha seu próprio CPF
+                if (clienteId.HasValue && clienteExistente.Id == clienteId.Value)
+                {
+                    return; // CPF pertence ao próprio cliente sendo editado
+                }
+
+                throw new Exception("Já existe um cliente cadastrado com este CPF.");
+            }
+        }
+
     }
 }
