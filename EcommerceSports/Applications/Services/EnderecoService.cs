@@ -1,24 +1,67 @@
 ﻿using EcommerceSports.Applications.DTO;
 using EcommerceSports.Applications.Services.Interfaces;
+using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
 
 namespace EcommerceSports.Applications.Services
 {
     public class EnderecoService : IEnderecoService
     {
-        public Task CadastrarEndereco(int id, EnderecoDTO endereco)
+        private readonly IEnderecoRepository _enderecoRepository;
+
+        public EnderecoService(IEnderecoRepository enderecoRepository)
         {
-            throw new NotImplementedException();
+            _enderecoRepository = enderecoRepository;
         }
 
-        public Task EditarEndereco(int id, EditarEnderecoDTO enderecoDTO)
+        public async Task CadastrarEndereco(int id, EnderecoDTO enderecoDTO)
         {
-            throw new NotImplementedException();
+            var endereco = new Endereco
+            {
+                ClienteId = id,
+                TipoEndereco = enderecoDTO.TipoEndereco,
+                TipoResidencia = enderecoDTO.TipoResidencia,
+                TipoLogradouro = enderecoDTO.TipoLogradouro,
+                Nome = enderecoDTO.Nome,
+                Logradouro = enderecoDTO.Logradouro,
+                Numero = enderecoDTO.Numero,
+                Cep = enderecoDTO.Cep,
+                Bairro = enderecoDTO.Bairro,
+                Cidade = enderecoDTO.Cidade,
+                Estado = enderecoDTO.Estado,
+                Pais = enderecoDTO.Pais,
+                Observacoes = enderecoDTO.Observacoes
+            };
+
+            await _enderecoRepository.CadastrarEndereco(id, endereco);
         }
 
-        public Task ValidarEndereco(IEnumerable<Endereco> enderecos)
+        public async Task EditarEndereco(int id, EditarEnderecoDTO enderecoDTO)
         {
-            throw new NotImplementedException();
+            var endereco = new Endereco
+            {
+                Id = id,
+                TipoEndereco = enderecoDTO.TipoEndereco,
+                TipoResidencia = enderecoDTO.TipoResidencia,
+                TipoLogradouro = enderecoDTO.TipoLogradouro,
+                Nome = enderecoDTO.Nome,
+                Logradouro = enderecoDTO.Logradouro,
+                Numero = enderecoDTO.Numero,
+                Cep = enderecoDTO.Cep,
+                Bairro = enderecoDTO.Bairro,
+                Cidade = enderecoDTO.Cidade,
+                Estado = enderecoDTO.Estado,
+                Pais = enderecoDTO.Pais,
+                Observacoes = enderecoDTO.Observacoes
+            };
+
+            await _enderecoRepository.EditarEndereco(id, endereco);
+        }
+
+        public async Task ValidarEndereco(IEnumerable<Endereco> enderecos)
+        {
+            // Implementar validações de negócio se necessário
+            await Task.CompletedTask;
         }
     }
 }
