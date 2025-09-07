@@ -6,6 +6,5 @@ namespace EcommerceSports.Applications.Services.Interfaces
     {
         Task<ResponseCartaoDTO> CadastrarCartao(int clienteId, CadastrarCartaoDTO cartao);
         Task<List<ResponseCartaoDTO>> ListarCartoesPorCliente(int clienteId);
-        Task<ResponseCartaoDTO?> ObterCartaoPorId(int cartaoId);
     }
 }

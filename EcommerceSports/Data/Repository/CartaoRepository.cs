@@ -28,10 +28,5 @@ namespace EcommerceSports.Data.Repository
                 .ToListAsync();
         }
 
-        public async Task<CartaoCredito?> ObterCartaoPorId(int cartaoId)
-        {
-            return await _context.Cartoes
-                .FirstOrDefaultAsync(c => c.Id == cartaoId);
-        }
     }
 }

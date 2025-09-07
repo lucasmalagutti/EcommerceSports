@@ -48,26 +48,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("{cartaoId}")]
-        public async Task<IActionResult> ObterCartaoPorId(int cartaoId)
-        {
-            try
-            {
-                var cartao = await _cartaoService.ObterCartaoPorId(cartaoId);
-                
-                if (cartao == null)
-                {
-                    return NotFound(new { erro = "Cartão não encontrado." });
-                }
-
-                return Ok(cartao);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { erro = "Erro interno do servidor. Tente novamente mais tarde." });
-            }
-        }
 
     }
 }

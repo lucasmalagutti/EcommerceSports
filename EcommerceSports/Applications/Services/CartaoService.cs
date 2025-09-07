@@ -57,22 +57,5 @@ namespace EcommerceSports.Applications.Services
             }).ToList();
         }
 
-        public async Task<ResponseCartaoDTO?> ObterCartaoPorId(int cartaoId)
-        {
-            var cartao = await _cartaoRepository.ObterCartaoPorId(cartaoId);
-            
-            if (cartao == null)
-                return null;
-
-            return new ResponseCartaoDTO
-            {
-                Id = cartao.Id,
-                NumCartao = cartao.NumCartao,
-                NomeImpresso = cartao.NomeImpresso,
-                Bandeira = cartao.Bandeira,
-                Preferencial = cartao.Preferencial,
-                ClienteId = cartao.ClienteId
-            };
-        }
     }
 }

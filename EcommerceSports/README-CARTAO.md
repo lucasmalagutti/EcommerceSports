@@ -75,21 +75,6 @@ Todo cartão de crédito deve ser de alguma bandeira registrada no sistema:
 ]
 ```
 
-### 3. Obter Cartão por ID
-**GET** `/api/Cartao/{cartaoId}`
-
-**Resposta (200):**
-```json
-{
-  "id": 1,
-  "numCartao": "4532 1234 5678 9012",
-  "nomeImpresso": "JOAO DA SILVA",
-  "bandeira": 1,
-  "preferencial": true,
-  "clienteId": 1,
-  "bandeiraNome": "Visa"
-}
-```
 
 
 ## Validações Implementadas
@@ -97,9 +82,6 @@ Todo cartão de crédito deve ser de alguma bandeira registrada no sistema:
 **Nota**: Todas as validações foram removidas conforme solicitado. O fluxo agora aceita qualquer valor nos campos sem validação.
 
 ## Códigos de Erro
-
-### 404 - Not Found
-- Cartão não encontrado
 
 ### 500 - Internal Server Error
 - Erro interno do servidor
