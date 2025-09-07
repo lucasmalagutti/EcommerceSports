@@ -4,6 +4,9 @@ namespace EcommerceSports.Data.Repository.Interfaces
 {
     public interface ICartaoRepository
     {
-        Task CadastrarCartao(int id, CartaoCredito cartao);
+        Task<CartaoCredito> CadastrarCartao(CartaoCredito cartao);
+        Task<List<CartaoCredito>> ListarCartoesPorCliente(int clienteId);
+        Task<CartaoCredito?> ObterCartaoPorId(int cartaoId);
+        Task<bool> ExisteCartaoComNumero(string numCartao, int clienteId);
     }
 }
