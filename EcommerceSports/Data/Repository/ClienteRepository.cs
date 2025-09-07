@@ -87,8 +87,15 @@ namespace EcommerceSports.Data.Repository
                 throw new Exception($"Erro ao cadastrar cliente e dados relacionados: {ex.Message}", ex);
             }
         }
-    
-        
+
+        public async Task<List<Cliente>> ListarTodos()
+        {
+            return await _context.Clientes
+        .Include(c => c.Endereco)      
+        .Include(c => c.Telefones)     
+        .Include(c => c.Cartoes)       
+        .ToListAsync();
+        }
     }
 }
 

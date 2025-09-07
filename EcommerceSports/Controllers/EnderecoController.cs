@@ -15,7 +15,7 @@ namespace EcommerceSports.Controllers
             _enderecoService = enderecoService;
         }
 
-        [HttpPost("cadastrar/{clienteId}")]
+        [HttpPost("/Endereco/Cadastrar/{clienteId}")]
         public async Task<IActionResult> CadastrarEndereco(int clienteId, [FromBody] EnderecoDTO enderecoDTO)
         {
             try
@@ -35,7 +35,7 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        [HttpPut("editar/{enderecoId}")]
+        [HttpPut("/Endereco/Editar/{enderecoId}")]
         public async Task<IActionResult> EditarEndereco(int enderecoId, [FromBody] EditarEnderecoDTO enderecoDTO)
         {
             try

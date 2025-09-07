@@ -129,5 +129,23 @@ namespace EcommerceSports.Applications.Services
 
            await _clienteRepository.CadastrarCliente(cliente);
         }
+
+        public async Task<List<ListarClienteDTO>> ListarDadosCliente()
+        {
+            var clientes = await _clienteRepository.ListarTodos();
+            return clientes.Select(c => new ListarClienteDTO
+            {
+                Id = c.Id,
+                Nome = c.Nome,
+                Cpf = c.Cpf,
+                Email = c.Email,
+                DtNasc = c.DtNasc,
+                Genero = c.Genero,
+                Ddd = c.Telefones.FirstOrDefault()?.Ddd,
+                NumeroTelefone = c.Telefones.FirstOrDefault()?.Numero,
+                TipoTelefone = c.Telefones.FirstOrDefault()?.TipoTelefone ?? 0,
+                CadastroAtivo = c.CadastroAtivo
+            }).ToList();
+        }
     }
 }

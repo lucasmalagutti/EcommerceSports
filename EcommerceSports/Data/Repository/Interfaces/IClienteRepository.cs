@@ -8,5 +8,7 @@ namespace EcommerceSports.Data.Infra.Interfaces
 
         Task<Cliente?> BuscarPorId(int id);
         Task AtualizarCliente(Cliente cliente);
+
+        Task<List<Cliente>> ListarTodos();
     }
 }

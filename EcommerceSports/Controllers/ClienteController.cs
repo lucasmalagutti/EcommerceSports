@@ -28,7 +28,7 @@ namespace EcommerceSports.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpPut("Cliente/AlterarStatus/{id}")]
+        [HttpPut("/Cliente/AlterarStatus/{id}")]
         public async Task<IActionResult> AtualizarStatus(int id, [FromBody] EditarStatusClienteDTO status)
         {
             try
@@ -42,7 +42,7 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        [HttpPut("Cliente/AlterarSenha/{id}")]
+        [HttpPut("/Cliente/AlterarSenha/{id}")]
         public async Task<IActionResult> AtualizarSenha(int id, [FromBody] EditarSenhaDTO senha)
         {
             try
@@ -70,6 +70,14 @@ namespace EcommerceSports.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet]
+        [Route("/Cliente/Listar")]
+        public async Task<IActionResult> ListarClientes()
+        {
+            var clientes = await _clienteService.ListarDadosCliente();
+            return Ok(clientes);
+        }
+
     }
 }
 
