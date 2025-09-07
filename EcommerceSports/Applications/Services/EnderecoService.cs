@@ -2,6 +2,7 @@
 using EcommerceSports.Applications.Services.Interfaces;
 using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
+using EcommerceSports.Models.Enums;
 
 namespace EcommerceSports.Applications.Services
 {
@@ -41,17 +42,17 @@ namespace EcommerceSports.Applications.Services
             var endereco = new Endereco
             {
                 Id = id,
-                TipoEndereco = enderecoDTO.TipoEndereco,
-                TipoResidencia = enderecoDTO.TipoResidencia,
-                TipoLogradouro = enderecoDTO.TipoLogradouro,
-                Nome = enderecoDTO.Nome,
-                Logradouro = enderecoDTO.Logradouro,
-                Numero = enderecoDTO.Numero,
-                Cep = enderecoDTO.Cep,
-                Bairro = enderecoDTO.Bairro,
-                Cidade = enderecoDTO.Cidade,
-                Estado = enderecoDTO.Estado,
-                Pais = enderecoDTO.Pais,
+                TipoEndereco = TipoEndereco.Cobranca, // Valor padrão, pois não está no DTO
+                TipoResidencia = enderecoDTO.TipoResidencia.HasValue ? (TipoResidencia)enderecoDTO.TipoResidencia.Value : TipoResidencia.Casa,
+                TipoLogradouro = enderecoDTO.TipoLogradouro.HasValue ? (TipoLogradouro)enderecoDTO.TipoLogradouro.Value : TipoLogradouro.Rua,
+                Nome = enderecoDTO.Nome ?? string.Empty,
+                Logradouro = enderecoDTO.Logradouro ?? string.Empty,
+                Numero = enderecoDTO.Numero ?? string.Empty,
+                Cep = enderecoDTO.Cep ?? string.Empty,
+                Bairro = enderecoDTO.Bairro ?? string.Empty,
+                Cidade = enderecoDTO.Cidade ?? string.Empty,
+                Estado = enderecoDTO.Estado ?? string.Empty,
+                Pais = enderecoDTO.Pais ?? string.Empty,
                 Observacoes = enderecoDTO.Observacoes
             };
 
