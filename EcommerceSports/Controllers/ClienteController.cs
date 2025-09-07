@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EcommerceSports.Controllers
 {
     [ApiController]
-    [Route("api/[ClienteController]")]
+    [Route("api/[controller]")]
     public class ClienteController : Controller
     {
         private readonly IClienteService _clienteService;
