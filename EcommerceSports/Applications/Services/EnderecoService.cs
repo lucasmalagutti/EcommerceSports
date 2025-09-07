@@ -36,6 +36,36 @@ namespace EcommerceSports.Applications.Services
 
             await _enderecoRepository.CadastrarEndereco(id, endereco);
         }
+
+        public async Task EditarEndereco(int id, EditarEnderecoDTO enderecoDTO)
+        {
+            // Busca o endereço existente para manter os valores atuais dos enums
+            var enderecoExistente = await _enderecoRepository.BuscarEnderecoPorId(id);
+            if (enderecoExistente == null)
+            {
+                throw new ArgumentException("Endereço não encontrado");
+            }
+
+            var endereco = new Endereco
+            {
+                Id = id,
+                TipoEndereco = enderecoExistente.TipoEndereco, // Mantém o valor atual
+                TipoResidencia = enderecoDTO.TipoResidencia.HasValue ? (TipoResidencia)enderecoDTO.TipoResidencia.Value : enderecoExistente.TipoResidencia,
+                TipoLogradouro = enderecoDTO.TipoLogradouro.HasValue ? (TipoLogradouro)enderecoDTO.TipoLogradouro.Value : enderecoExistente.TipoLogradouro,
+                Nome = enderecoDTO.Nome ?? enderecoExistente.Nome,
+                Logradouro = enderecoDTO.Logradouro ?? enderecoExistente.Logradouro,
+                Numero = enderecoDTO.Numero ?? enderecoExistente.Numero,
+                Cep = enderecoDTO.Cep ?? enderecoExistente.Cep,
+                Bairro = enderecoDTO.Bairro ?? enderecoExistente.Bairro,
+                Cidade = enderecoDTO.Cidade ?? enderecoExistente.Cidade,
+                Estado = enderecoDTO.Estado ?? enderecoExistente.Estado,
+                Pais = enderecoDTO.Pais ?? enderecoExistente.Pais,
+                Observacoes = enderecoDTO.Observacoes ?? enderecoExistente.Observacoes
+            };
+
+            await _enderecoRepository.EditarEndereco(id, endereco);
+        }
+
         public async Task ValidarEndereco(IEnumerable<Endereco> enderecos)
         {
             // Implementar validações de negócio se necessário

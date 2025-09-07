@@ -1,0 +1,52 @@
+{
+  "exemplo_editar_endereco": {
+    "descricao": "Exemplo de como usar o endpoint PUT para editar um endereço",
+    "endpoint": "PUT /api/endereco/editar/{enderecoId}",
+    "exemplo_request": {
+      "bairro": "Centro",
+      "cidade": "São Paulo",
+      "cep": "01234-567",
+      "estado": "SP",
+      "logradouro": "Rua das Flores",
+      "nome": "Casa Principal",
+      "numero": "123",
+      "observacoes": "Próximo ao shopping",
+      "pais": "Brasil",
+      "tipoLogradouro": 1,
+      "tipoResidencia": 1
+    },
+    "exemplo_request_parcial": {
+      "cidade": "Rio de Janeiro",
+      "estado": "RJ",
+      "tipoResidencia": 2
+    },
+    "respostas_possiveis": {
+      "sucesso": {
+        "status": 200,
+        "body": {
+          "message": "Endereço atualizado com sucesso"
+        }
+      },
+      "erro_validacao": {
+        "status": 400,
+        "body": {
+          "message": "Pelo menos um campo deve ser fornecido para atualização"
+        }
+      },
+      "erro_nao_encontrado": {
+        "status": 500,
+        "body": {
+          "message": "Erro interno do servidor",
+          "error": "Endereço não encontrado"
+        }
+      }
+    },
+    "observacoes": [
+      "Todos os campos são opcionais no DTO",
+      "Apenas os campos fornecidos serão atualizados",
+      "Os enums TipoLogradouro e TipoResidencia são opcionais",
+      "Se um enum não for fornecido, o valor atual será mantido",
+      "O ID do endereço deve ser válido e existir no banco"
+    ]
+  }
+}

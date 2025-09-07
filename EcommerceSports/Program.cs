@@ -8,7 +8,6 @@ using EcommerceSports.Applications.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -19,15 +18,24 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IEnderecoService, EnderecoService>();
-builder.Services.AddScoped<IEnderecoRepository, EnderecoRepository>(); // LINHA ADICIONADA
+builder.Services.AddScoped<IEnderecoRepository, EnderecoRepository>(); 
 builder.Services.AddScoped<ICartaoService, CartaoService>();
 builder.Services.AddScoped<ICartaoRepository, CartaoRepository>();
 builder.Services.AddScoped<ITelefoneRepository, TelefoneRepository>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 if (!app.Environment.IsDevelopment())
 {
