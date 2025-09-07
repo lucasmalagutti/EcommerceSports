@@ -15,7 +15,7 @@ namespace EcommerceSports.Controllers
             _clienteService = clienteService;
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("/Cliente/Editar/{id}")]
         public async Task<IActionResult> AtualizarCliente(int id, [FromBody] EditarClienteDTO cliente)
         {
             try
@@ -28,7 +28,7 @@ namespace EcommerceSports.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpPut("{id}/AlterarStatus")]
+        [HttpPut("Cliente/AlterarStatus/{id}")]
         public async Task<IActionResult> AtualizarStatus(int id, [FromBody] EditarStatusClienteDTO status)
         {
             try
@@ -42,7 +42,7 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        [HttpPut("{id}/AlterarSenha")]
+        [HttpPut("Cliente/AlterarSenha/{id}")]
         public async Task<IActionResult> AtualizarSenha(int id, [FromBody] EditarSenhaDTO senha)
         {
             try
@@ -57,7 +57,7 @@ namespace EcommerceSports.Controllers
         }
 
         [HttpPost]
-        [Route("/Cadastrar/Cliente")]
+        [Route("/Cliente/Cadastrar")]
         public IActionResult CadastrarCliente([FromBody] ClienteDTO cliente)
         {
             try
