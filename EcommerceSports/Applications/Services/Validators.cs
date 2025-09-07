@@ -1,6 +1,8 @@
 ﻿using EcommerceSports.Applications.Services.Interfaces;
 using EcommerceSports.Data.Infra.Interfaces;
 using EcommerceSports.Data.Repository;
+using EcommerceSports.Models.Entity;
+using EcommerceSports.Models.Enums;
 using System.Text.RegularExpressions;
 
 namespace EcommerceSports.Applications.Services
@@ -35,6 +37,27 @@ namespace EcommerceSports.Applications.Services
                 throw new Exception("A senha deve conter pelo menos um caractere especial.");
             }
 
+        }
+
+        public void ValidarEnderecos(List<Endereco> enderecos)
+        {
+            if (enderecos == null || !enderecos.Any())
+            {
+                throw new System.Exception("É necessário cadastrar ao menos um endereço.");
+            }
+
+            var temEnderecoCobranca = enderecos.Any(e => e.TipoEndereco == TipoEndereco.Cobranca);
+            var temEnderecoEntrega = enderecos.Any(e => e.TipoEndereco == TipoEndereco.Entrega);
+
+            if (!temEnderecoCobranca)
+            {
+                throw new System.Exception("É necessário cadastrar um endereço de cobrança.");
+            }
+
+            if (!temEnderecoEntrega)
+            {
+                throw new System.Exception("É necessário cadastrar um endereço de entrega.");
+            }
         }
 
     }

@@ -130,6 +130,7 @@ namespace EcommerceSports.Applications.Services
             cartao.Cliente = cliente;
 
             _validators.ValidarSenha(cliente.Senha);
+            _validators.ValidarEnderecos(cliente.Endereco);
 
            await _clienteRepository.CadastrarCliente(cliente);
         }
