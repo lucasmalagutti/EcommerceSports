@@ -78,28 +78,5 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("bandeiras")]
-        public IActionResult ListarBandeirasPermitidas()
-        {
-            try
-            {
-                var bandeiras = new[]
-                {
-                    new { id = 1, nome = "Visa" },
-                    new { id = 2, nome = "Mastercard" },
-                    new { id = 3, nome = "American Express" },
-                    new { id = 4, nome = "Elo" },
-                    new { id = 5, nome = "HiperCard" },
-                    new { id = 6, nome = "Aura" }
-                };
-
-                return Ok(bandeiras);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { erro = "Erro interno do servidor. Tente novamente mais tarde." });
-            }
-        }
     }
 }

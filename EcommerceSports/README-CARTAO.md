@@ -89,20 +89,6 @@ Todo cartão de crédito deve ser de alguma bandeira registrada no sistema:
 }
 ```
 
-### 4. Listar Bandeiras Permitidas
-**GET** `/api/Cartao/bandeiras`
-
-**Resposta (200):**
-```json
-[
-  { "id": 1, "nome": "Visa" },
-  { "id": 2, "nome": "Mastercard" },
-  { "id": 3, "nome": "American Express" },
-  { "id": 4, "nome": "Elo" },
-  { "id": 5, "nome": "HiperCard" },
-  { "id": 6, "nome": "Aura" }
-]
-```
 
 ## Validações Implementadas
 
@@ -151,9 +137,6 @@ curl -X POST "https://localhost:7000/api/Cartao/Cadastrar/Cartao" \
 
 # Listar cartões de um cliente
 curl -X GET "https://localhost:7000/api/Cartao/cliente/1"
-
-# Obter bandeiras permitidas
-curl -X GET "https://localhost:7000/api/Cartao/bandeiras"
 ```
 
 ## Arquivos Criados/Modificados
