@@ -18,14 +18,7 @@ namespace EcommerceSports.Data.Repository
         {
             try
             {
-                // Verificar se o cliente existe
-                var clienteExiste = await _context.Clientes.AnyAsync(c => c.Id == clienteId);
-                if (!clienteExiste)
-                {
-                    throw new Exception($"Cliente com ID {clienteId} não encontrado.");
-                }
 
-                // Configurar o ClienteId do endereço
                 endereco.ClienteId = clienteId;
 
                 // Adicionar o endereço
@@ -37,15 +30,7 @@ namespace EcommerceSports.Data.Repository
                 var innerException = dbEx.InnerException;
                 var errorMessage = "Erro ao adicionar endereço no banco de dados: ";
                 
-                if (innerException != null)
-                {
-                    errorMessage += innerException.Message;
-                }
-                else
-                {
-                    errorMessage += dbEx.Message;
-                }
-                
+
                 throw new Exception(errorMessage, dbEx);
             }
             catch (Exception ex)

@@ -18,7 +18,6 @@ namespace EcommerceSports.Applications.Services
         {
             try
             {
-                // Validar dados obrigatórios
                 if (string.IsNullOrWhiteSpace(enderecoDTO.Nome))
                     throw new Exception("Nome do endereço é obrigatório.");
 
@@ -68,10 +67,6 @@ namespace EcommerceSports.Applications.Services
             }
         }
 
-        public Task CadastrarEndereco(int id, EnderecoDTO endereco)
-        {
-            throw new NotImplementedException();
-        }
 
         public Task EditarEndereco(int id, EditarEnderecoDTO enderecoDTO)
         {
