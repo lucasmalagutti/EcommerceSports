@@ -8,10 +8,11 @@ namespace EcommerceSports.Applications.Services
     public class ClienteService : IClienteService
     {
         private readonly IClienteRepository _clienteRepository;
-
-        public ClienteService(IClienteRepository clienteRepository)
+        private readonly IValidators _validators;
+        public ClienteService(IClienteRepository clienteRepository, IValidators validators)
         {
             _clienteRepository = clienteRepository;
+            _validators = validators;
         }
 
         public async Task AtualizarCliente(int id, EditarClienteDTO clientedto)
@@ -20,6 +21,9 @@ namespace EcommerceSports.Applications.Services
 
             if (clienteExistente == null)
                 throw new Exception("Cliente não encontrado.");
+
+            // Validar se o CPF já existe (excluindo o próprio cliente)
+            await _validators.ValidarCpfExistente(clientedto.Cpf, id);
 
             clienteExistente.Nome = clientedto.Nome;
             clienteExistente.DtNasc = clientedto.DtNascimento ?? clienteExistente.DtNasc;
@@ -42,13 +46,16 @@ namespace EcommerceSports.Applications.Services
             if (cliente == null)
                 throw new Exception("Cliente não existe.");
 
-            if (cliente.Senha != senha.SenhaAtual)
+            if (!_validators.VerificarSenha(senha.SenhaAtual, cliente.Senha))
                 throw new Exception("Senha atual incorreta.");
 
             if (senha.NovaSenha != senha.ConfirmarNovaSenha)
                 throw new Exception("A nova senha e a confirmação não coincidem.");
 
-            cliente.Senha = senha.NovaSenha;
+            _validators.ValidarSenha(senha.NovaSenha);
+            
+            cliente.Senha = _validators.CriptografarSenha(senha.NovaSenha);
+            
             await _clienteRepository.AtualizarCliente(cliente);
         }
 
@@ -126,6 +133,12 @@ namespace EcommerceSports.Applications.Services
             
             telefone.Cliente = cliente;
             cartao.Cliente = cliente;
+
+            _validators.ValidarSenha(cliente.Senha);
+            _validators.ValidarEnderecos(cliente.Endereco);
+            await _validators.ValidarCpfExistente(cliente.Cpf);
+
+            cliente.Senha = _validators.CriptografarSenha(cliente.Senha);
 
            await _clienteRepository.CadastrarCliente(cliente);
         }

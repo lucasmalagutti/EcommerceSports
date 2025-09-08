@@ -58,11 +58,11 @@ namespace EcommerceSports.Controllers
 
         [HttpPost]
         [Route("/Cliente/Cadastrar")]
-        public IActionResult CadastrarCliente([FromBody] ClienteDTO cliente)
+        public async Task<IActionResult> CadastrarCliente([FromBody] ClienteDTO cliente)
         {
             try
             {
-                _clienteService.CadastrarCliente(cliente);
+                await _clienteService.CadastrarCliente(cliente);
                 return Ok("Cliente cadastrado com sucesso!");
             }
             catch (Exception ex)

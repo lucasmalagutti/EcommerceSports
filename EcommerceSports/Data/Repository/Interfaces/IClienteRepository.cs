@@ -7,6 +7,7 @@ namespace EcommerceSports.Data.Infra.Interfaces
         Task CadastrarCliente(Cliente cliente);
 
         Task<Cliente?> BuscarPorId(int id);
+        Task<Cliente?> BuscarPorCpf(string cpf);
         Task AtualizarCliente(Cliente cliente);
 
         Task<List<Cliente>> ListarTodos();
