@@ -84,9 +84,7 @@ namespace EcommerceSports.Applications.Services
 
         public string CriptografarSenha(string senha)
         {
-            if (string.IsNullOrEmpty(senha))
-
-            return BCrypt.Net.BCrypt.HashPassword(senha);
+                return BCrypt.Net.BCrypt.HashPassword(senha);
         }
 
         public bool VerificarSenha(string senha, string hashSenha)
