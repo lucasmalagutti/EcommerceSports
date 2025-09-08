@@ -46,14 +46,16 @@ namespace EcommerceSports.Applications.Services
             if (cliente == null)
                 throw new Exception("Cliente não existe.");
 
-            if (cliente.Senha != senha.SenhaAtual)
+            if (!_validators.VerificarSenha(senha.SenhaAtual, cliente.Senha))
                 throw new Exception("Senha atual incorreta.");
 
             if (senha.NovaSenha != senha.ConfirmarNovaSenha)
                 throw new Exception("A nova senha e a confirmação não coincidem.");
 
             _validators.ValidarSenha(senha.NovaSenha);
-            cliente.Senha = senha.NovaSenha;
+            
+            cliente.Senha = _validators.CriptografarSenha(senha.NovaSenha);
+            
             await _clienteRepository.AtualizarCliente(cliente);
         }
 
@@ -135,6 +137,8 @@ namespace EcommerceSports.Applications.Services
             _validators.ValidarSenha(cliente.Senha);
             _validators.ValidarEnderecos(cliente.Endereco);
             await _validators.ValidarCpfExistente(cliente.Cpf);
+
+            cliente.Senha = _validators.CriptografarSenha(cliente.Senha);
 
            await _clienteRepository.CadastrarCliente(cliente);
         }

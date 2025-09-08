@@ -4,6 +4,7 @@ using EcommerceSports.Data.Repository;
 using EcommerceSports.Models.Entity;
 using EcommerceSports.Models.Enums;
 using System.Text.RegularExpressions;
+using BCrypt.Net;
 
 namespace EcommerceSports.Applications.Services
 {
@@ -79,6 +80,19 @@ namespace EcommerceSports.Applications.Services
 
                 throw new Exception("Já existe um cliente cadastrado com este CPF.");
             }
+        }
+
+        public string CriptografarSenha(string senha)
+        {
+            if (string.IsNullOrEmpty(senha))
+
+            return BCrypt.Net.BCrypt.HashPassword(senha);
+        }
+
+        public bool VerificarSenha(string senha, string hashSenha)
+        {
+  
+            return BCrypt.Net.BCrypt.Verify(senha, hashSenha);
         }
 
     }
