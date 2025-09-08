@@ -37,6 +37,7 @@ namespace EcommerceSports.Applications.Services
                 NumCartao = cartaoSalvo.NumCartao,
                 NomeImpresso = cartaoSalvo.NomeImpresso,
                 Bandeira = cartaoSalvo.Bandeira,
+                Cvc = cartaoSalvo.Cvc,
                 Preferencial = cartaoSalvo.Preferencial,
                 ClienteId = cartaoSalvo.ClienteId
             };
@@ -52,6 +53,7 @@ namespace EcommerceSports.Applications.Services
                 NumCartao = c.NumCartao,
                 NomeImpresso = c.NomeImpresso,
                 Bandeira = c.Bandeira,
+                Cvc = c.Cvc,
                 Preferencial = c.Preferencial,
                 ClienteId = c.ClienteId
             }).ToList();
