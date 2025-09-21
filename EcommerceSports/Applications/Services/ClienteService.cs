@@ -22,7 +22,6 @@ namespace EcommerceSports.Applications.Services
             if (clienteExistente == null)
                 throw new Exception("Cliente não encontrado.");
 
-            // Validar se o CPF já existe (excluindo o próprio cliente)
             await _validators.ValidarCpfExistente(clientedto.Cpf, id);
 
             clienteExistente.Nome = clientedto.Nome;
@@ -69,6 +68,25 @@ namespace EcommerceSports.Applications.Services
             cliente.CadastroAtivo = status.CadastroAtivo;
 
             await _clienteRepository.AtualizarCliente(cliente);
+        }
+
+        public async Task<List<ListarClienteDTO>> BuscarPorFiltro(ClienteFiltroDTO filtros)
+        {
+            var clientes = await _clienteRepository.BuscarPorFiltro(filtros);
+
+            return clientes.Select(c => new ListarClienteDTO
+            {
+                Id = c.Id,
+                Nome = c.Nome,
+                Cpf = c.Cpf,
+                Email = c.Email,
+                DtNasc = c.DtNasc,
+                Genero = c.Genero,
+                Ddd = c.Telefones.FirstOrDefault()?.Ddd,
+                NumeroTelefone = c.Telefones.FirstOrDefault()?.Numero,
+                TipoTelefone = c.Telefones.FirstOrDefault()?.TipoTelefone ?? 0,
+                CadastroAtivo = c.CadastroAtivo
+            }).ToList();
         }
 
         public async Task CadastrarCliente(ClienteDTO clientedto)
@@ -125,7 +143,6 @@ namespace EcommerceSports.Applications.Services
                 
             };
 
-            // Configurar os relacionamentos bidirecionais
             foreach (var endereco in enderecos)
             {
                 endereco.Cliente = cliente;

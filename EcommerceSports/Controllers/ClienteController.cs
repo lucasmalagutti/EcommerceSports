@@ -77,6 +77,13 @@ namespace EcommerceSports.Controllers
             var clientes = await _clienteService.ListarDadosCliente();
             return Ok(clientes);
         }
+        [HttpGet]
+        [Route("/Cliente/BuscarPorFiltro")]
+        public async Task<IActionResult> BuscarPorFiltro([FromQuery] ClienteFiltroDTO filtros)
+        {
+            var clientes = await _clienteService.BuscarPorFiltro(filtros);
+            return Ok(clientes);
+        }
 
     }
 }

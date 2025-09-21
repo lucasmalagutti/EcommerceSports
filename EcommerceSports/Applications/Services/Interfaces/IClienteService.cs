@@ -12,5 +12,6 @@ namespace EcommerceSports.Applications.Services.Interfaces
         Task AtualizarStatusCliente(int id, EditarStatusClienteDTO status);
 
         Task<List<ListarClienteDTO>> ListarDadosCliente();
+        Task<List<ListarClienteDTO>> BuscarPorFiltro(ClienteFiltroDTO filtros);
     }
 }

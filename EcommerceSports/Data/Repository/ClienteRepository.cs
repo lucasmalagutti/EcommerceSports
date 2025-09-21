@@ -1,4 +1,5 @@
-﻿using EcommerceSports.Data.Context;
+﻿using EcommerceSports.Applications.DTO;
+using EcommerceSports.Data.Context;
 using EcommerceSports.Data.Infra.Interfaces;
 using EcommerceSports.Models.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -50,13 +51,10 @@ namespace EcommerceSports.Data.Repository
             try
             {
 
-                // Adicionar o cliente primeiro
                 _context.Clientes.Add(cliente);
                 
-                // Salvar para gerar o ID do cliente
                 _context.SaveChanges();
                 
-                // Agora configurar os IDs das entidades relacionadas
                 foreach (var endereco in cliente.Endereco)
                 {
                     endereco.ClienteId = cliente.Id;
@@ -71,8 +69,7 @@ namespace EcommerceSports.Data.Repository
                 {
                     cartao.ClienteId = cliente.Id;
                 }
-                
-                // Salvar novamente para persistir as entidades relacionadas
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException dbEx)
@@ -104,6 +101,40 @@ namespace EcommerceSports.Data.Repository
         .Include(c => c.Telefones)     
         .Include(c => c.Cartoes)       
         .ToListAsync();
+        }
+
+        public async Task<List<Cliente>> BuscarPorFiltro(ClienteFiltroDTO filtros)
+        {
+            var query = _context.Clientes
+        .Include(c => c.Endereco)
+        .Include(c => c.Telefones)
+        .Include(c => c.Cartoes)
+        .AsQueryable();
+
+            if (!string.IsNullOrEmpty(filtros.Nome))
+                query = query.Where(c => c.Nome.Contains(filtros.Nome));
+
+            if (!string.IsNullOrEmpty(filtros.Cpf))
+                query = query.Where(c => c.Cpf == filtros.Cpf);
+
+            if (!string.IsNullOrEmpty(filtros.Email))
+                query = query.Where(c => c.Email.Contains(filtros.Email));
+
+            if (!string.IsNullOrEmpty(filtros.Telefone))
+                query = query.Where(c => c.Telefones.Any(t => t.Numero.Contains(filtros.Telefone)));
+
+            if (!string.IsNullOrEmpty(filtros.TipoTelefone))
+                query = query.Where(c => c.Telefones.Any(t =>
+                    t.TipoTelefone.ToString().ToLower() == filtros.TipoTelefone.ToLower()
+                ));
+
+            if (!string.IsNullOrEmpty(filtros.Status))
+            {
+                bool ativo = filtros.Status.ToLower() == "ativo";
+                query = query.Where(c => c.CadastroAtivo == ativo);
+            }
+
+            return await query.ToListAsync();
         }
     }
 }

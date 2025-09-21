@@ -1,4 +1,5 @@
-﻿using EcommerceSports.Models.Entity;
+﻿using EcommerceSports.Applications.DTO;
+using EcommerceSports.Models.Entity;
 
 namespace EcommerceSports.Data.Infra.Interfaces
 {
@@ -11,5 +12,6 @@ namespace EcommerceSports.Data.Infra.Interfaces
         Task AtualizarCliente(Cliente cliente);
 
         Task<List<Cliente>> ListarTodos();
+        Task<List<Cliente>> BuscarPorFiltro(ClienteFiltroDTO filtros);
     }
 }
