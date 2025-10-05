@@ -78,6 +78,7 @@ namespace EcommerceSports.Data.Context
                 entity.Property(e => e.Categoria).IsRequired();
                 entity.Property(e => e.Nome).IsRequired();
                 entity.Property(e => e.Descricao).IsRequired();
+                entity.Property(e => e.Imagem);
             });
 
             // Configuração do Cupom

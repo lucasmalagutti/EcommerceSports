@@ -8,6 +8,7 @@ namespace EcommerceSports.Models.Entity
         public float Preco { get; set; }
         public int QtdEstoque { get; set; }
         public required string Descricao { get; set; }
+        public string? Imagem { get; set; }
     }
 }
 
