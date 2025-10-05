@@ -20,7 +20,8 @@ namespace EcommerceSports.Applications.Services
                 Nome = p.Nome,
                 Descricao = p.Descricao,
                 Preco = p.Preco,
-                Categoria = p.Categoria
+                Categoria = p.Categoria,
+                Imagem = p.Imagem
             }).ToList();
         }
     }
