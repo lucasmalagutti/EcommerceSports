@@ -8,5 +8,6 @@
         public List<Endereco> Endereco { get; set; } = new List<Endereco>();
         public List<Telefone> Telefones { get; set; } = new List<Telefone>();
         public List<CartaoCredito> Cartoes { get; set; } = new List<CartaoCredito>();
+        public List<Pedido> Pedidos { get; set; } = new List<Pedido>();
     }
 }

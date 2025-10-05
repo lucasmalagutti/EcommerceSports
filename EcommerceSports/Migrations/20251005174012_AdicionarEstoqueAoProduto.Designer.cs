@@ -3,6 +3,7 @@ using System;
 using EcommerceSports.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcommerceSports.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251005174012_AdicionarEstoqueAoProduto")]
+    partial class AdicionarEstoqueAoProduto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,26 +105,6 @@ namespace EcommerceSports.Migrations
                     b.ToTable("Clientes");
                 });
 
-            modelBuilder.Entity("EcommerceSports.Models.Entity.Cupom", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<float>("Desconto")
-                        .HasColumnType("real");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Cupons");
-                });
-
             modelBuilder.Entity("EcommerceSports.Models.Entity.Endereco", b =>
                 {
                     b.Property<int>("Id")
@@ -184,62 +167,6 @@ namespace EcommerceSports.Migrations
                     b.ToTable("Enderecos");
                 });
 
-            modelBuilder.Entity("EcommerceSports.Models.Entity.ItemPedido", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("PedidoId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("PrecoUnitario")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("ProdutoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Quantidade")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PedidoId");
-
-                    b.HasIndex("ProdutoId");
-
-                    b.ToTable("ItensPedido");
-                });
-
-            modelBuilder.Entity("EcommerceSports.Models.Entity.Pedido", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClienteId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("DataPedido")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("StatusPedido")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("ValorTotal")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClienteId");
-
-                    b.ToTable("Pedidos");
-                });
-
             modelBuilder.Entity("EcommerceSports.Models.Entity.Produto", b =>
                 {
                     b.Property<int>("Id")
@@ -247,10 +174,6 @@ namespace EcommerceSports.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Categoria")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
@@ -300,52 +223,6 @@ namespace EcommerceSports.Migrations
                     b.ToTable("Telefones");
                 });
 
-            modelBuilder.Entity("EcommerceSports.Models.Entity.Transacao", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CartaoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("CupomId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("DataTransacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EnderecoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PedidoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("StatusTransacao")
-                        .HasColumnType("integer");
-
-                    b.Property<float>("ValorFrete")
-                        .HasColumnType("real");
-
-                    b.Property<decimal>("ValorTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CartaoId");
-
-                    b.HasIndex("CupomId");
-
-                    b.HasIndex("EnderecoId");
-
-                    b.HasIndex("PedidoId")
-                        .IsUnique();
-
-                    b.ToTable("Transacoes");
-                });
-
             modelBuilder.Entity("EcommerceSports.Models.Entity.CartaoCredito", b =>
                 {
                     b.HasOne("EcommerceSports.Models.Entity.Cliente", "Cliente")
@@ -368,36 +245,6 @@ namespace EcommerceSports.Migrations
                     b.Navigation("Cliente");
                 });
 
-            modelBuilder.Entity("EcommerceSports.Models.Entity.ItemPedido", b =>
-                {
-                    b.HasOne("EcommerceSports.Models.Entity.Pedido", "Pedido")
-                        .WithMany("Itens")
-                        .HasForeignKey("PedidoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EcommerceSports.Models.Entity.Produto", "Produto")
-                        .WithMany()
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Pedido");
-
-                    b.Navigation("Produto");
-                });
-
-            modelBuilder.Entity("EcommerceSports.Models.Entity.Pedido", b =>
-                {
-                    b.HasOne("EcommerceSports.Models.Entity.Cliente", "Cliente")
-                        .WithMany("Pedidos")
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cliente");
-                });
-
             modelBuilder.Entity("EcommerceSports.Models.Entity.Telefone", b =>
                 {
                     b.HasOne("EcommerceSports.Models.Entity.Cliente", "Cliente")
@@ -409,56 +256,13 @@ namespace EcommerceSports.Migrations
                     b.Navigation("Cliente");
                 });
 
-            modelBuilder.Entity("EcommerceSports.Models.Entity.Transacao", b =>
-                {
-                    b.HasOne("EcommerceSports.Models.Entity.CartaoCredito", "Cartao")
-                        .WithMany()
-                        .HasForeignKey("CartaoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EcommerceSports.Models.Entity.Cupom", "Cupom")
-                        .WithMany()
-                        .HasForeignKey("CupomId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("EcommerceSports.Models.Entity.Endereco", "Endereco")
-                        .WithMany()
-                        .HasForeignKey("EnderecoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EcommerceSports.Models.Entity.Pedido", "Pedido")
-                        .WithOne("Transacao")
-                        .HasForeignKey("EcommerceSports.Models.Entity.Transacao", "PedidoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cartao");
-
-                    b.Navigation("Cupom");
-
-                    b.Navigation("Endereco");
-
-                    b.Navigation("Pedido");
-                });
-
             modelBuilder.Entity("EcommerceSports.Models.Entity.Cliente", b =>
                 {
                     b.Navigation("Cartoes");
 
                     b.Navigation("Endereco");
 
-                    b.Navigation("Pedidos");
-
                     b.Navigation("Telefones");
-                });
-
-            modelBuilder.Entity("EcommerceSports.Models.Entity.Pedido", b =>
-                {
-                    b.Navigation("Itens");
-
-                    b.Navigation("Transacao");
                 });
 #pragma warning restore 612, 618
         }
