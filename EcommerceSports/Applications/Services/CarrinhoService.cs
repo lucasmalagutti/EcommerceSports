@@ -83,8 +83,8 @@ namespace EcommerceSports.Applications.Services
                 await _carrinhoRepository.AdicionarItemCarrinhoAsync(carrinho.Id, produtoId, quantidade, (decimal)produto.Preco);
             }
 
-            // Atualizar valor total do pedido
-            carrinho.ValorTotal = await _carrinhoRepository.CalcularValorTotalAsync(carrinho.Id);
+            // Atualizar valor total do pedido no banco
+            await _carrinhoRepository.AtualizarValorTotalPedidoAsync(carrinho.Id);
 
             return await ObterCarrinhoAsync(clienteId);
         }
@@ -112,8 +112,8 @@ namespace EcommerceSports.Applications.Services
                 await _carrinhoRepository.AtualizarQuantidadeItemAsync(item.Id, quantidade);
             }
 
-            // Atualizar valor total do pedido
-            carrinho.ValorTotal = await _carrinhoRepository.CalcularValorTotalAsync(carrinho.Id);
+            // Atualizar valor total do pedido no banco
+            await _carrinhoRepository.AtualizarValorTotalPedidoAsync(carrinho.Id);
 
             return await ObterCarrinhoAsync(clienteId);
         }
@@ -132,8 +132,8 @@ namespace EcommerceSports.Applications.Services
                 await _carrinhoRepository.RemoverItemCarrinhoAsync(item.Id);
             }
 
-            // Atualizar valor total do pedido
-            carrinho.ValorTotal = await _carrinhoRepository.CalcularValorTotalAsync(carrinho.Id);
+            // Atualizar valor total do pedido no banco
+            await _carrinhoRepository.AtualizarValorTotalPedidoAsync(carrinho.Id);
 
             return await ObterCarrinhoAsync(clienteId);
         }
@@ -144,7 +144,7 @@ namespace EcommerceSports.Applications.Services
             if (carrinho != null)
             {
                 await _carrinhoRepository.LimparCarrinhoAsync(carrinho.Id);
-                carrinho.ValorTotal = 0;
+                await _carrinhoRepository.AtualizarValorTotalPedidoAsync(carrinho.Id);
             }
 
             return await ObterCarrinhoAsync(clienteId);
@@ -184,8 +184,8 @@ namespace EcommerceSports.Applications.Services
             item.Quantidade += 1;
             await _carrinhoRepository.AtualizarQuantidadeItemAsync(item.Id, item.Quantidade);
 
-            // Atualizar valor total do pedido
-            carrinho.ValorTotal = await _carrinhoRepository.CalcularValorTotalAsync(carrinho.Id);
+            // Atualizar valor total do pedido no banco
+            await _carrinhoRepository.AtualizarValorTotalPedidoAsync(carrinho.Id);
 
             return await ObterCarrinhoAsync(clienteId);
         }
@@ -216,8 +216,8 @@ namespace EcommerceSports.Applications.Services
                 await _carrinhoRepository.RemoverItemCarrinhoAsync(item.Id);
             }
 
-            // Atualizar valor total do pedido
-            carrinho.ValorTotal = await _carrinhoRepository.CalcularValorTotalAsync(carrinho.Id);
+            // Atualizar valor total do pedido no banco
+            await _carrinhoRepository.AtualizarValorTotalPedidoAsync(carrinho.Id);
 
             return await ObterCarrinhoAsync(clienteId);
         }

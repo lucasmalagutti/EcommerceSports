@@ -13,6 +13,7 @@ namespace EcommerceSports.Data.Repository.Interfaces
         Task RemoverItemCarrinhoAsync(int itemId);
         Task LimparCarrinhoAsync(int pedidoId);
         Task<decimal> CalcularValorTotalAsync(int pedidoId);
+        Task AtualizarValorTotalPedidoAsync(int pedidoId);
         Task<bool> ExisteProdutoAsync(int produtoId);
         Task<Produto?> ObterProdutoAsync(int produtoId);
     }

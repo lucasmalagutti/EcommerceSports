@@ -96,6 +96,16 @@ namespace EcommerceSports.Data.Repository
                 .SumAsync(i => i.Quantidade * i.PrecoUnitario);
         }
 
+        public async Task AtualizarValorTotalPedidoAsync(int pedidoId)
+        {
+            var pedido = await _context.Pedidos.FindAsync(pedidoId);
+            if (pedido != null)
+            {
+                pedido.ValorTotal = await CalcularValorTotalAsync(pedidoId);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task<bool> ExisteProdutoAsync(int produtoId)
         {
             return await _context.Produtos.AnyAsync(p => p.Id == produtoId);
