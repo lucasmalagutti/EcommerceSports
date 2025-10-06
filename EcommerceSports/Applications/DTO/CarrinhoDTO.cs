@@ -47,6 +47,7 @@ namespace EcommerceSports.Applications.DTO
     public class ResponseCarrinhoDTO
     {
         public int ClienteId { get; set; }
+        public int PedidoId { get; set; }
         public List<ResponseItemCarrinhoDTO> Itens { get; set; } = new List<ResponseItemCarrinhoDTO>();
         public decimal ValorTotal { get; set; }
         public int TotalItens { get; set; }

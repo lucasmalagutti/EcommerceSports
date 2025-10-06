@@ -129,10 +129,6 @@ namespace EcommerceSports.Data.Context
                       .WithOne(p => p.Transacao)
                       .HasForeignKey<Transacao>(e => e.PedidoId)
                       .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(e => e.Cupom)
-                      .WithMany()
-                      .HasForeignKey(e => e.CupomId)
-                      .OnDelete(DeleteBehavior.SetNull);
                 entity.HasOne(e => e.Endereco)
                       .WithMany()
                       .HasForeignKey(e => e.EnderecoId)

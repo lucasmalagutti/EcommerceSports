@@ -24,6 +24,7 @@ namespace EcommerceSports.Applications.Services
                 return new ResponseCarrinhoDTO
                 {
                     ClienteId = clienteId,
+                    PedidoId = 0,
                     Itens = new List<ResponseItemCarrinhoDTO>(),
                     ValorTotal = 0,
                     TotalItens = 0
@@ -46,6 +47,7 @@ namespace EcommerceSports.Applications.Services
             return new ResponseCarrinhoDTO
             {
                 ClienteId = clienteId,
+                PedidoId = carrinho.Id,
                 Itens = itens,
                 ValorTotal = valorTotal,
                 TotalItens = totalItens
