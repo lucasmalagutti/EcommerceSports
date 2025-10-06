@@ -15,5 +15,7 @@ namespace EcommerceSports.Applications.Services.Interfaces
         Task<bool> FinalizarCarrinhoAsync(int clienteId);
         Task<ResponseCarrinhoDTO> AdicionarQuantidadeAsync(int clienteId, int produtoId);
         Task<ResponseCarrinhoDTO> DiminuirQuantidadeAsync(int clienteId, int produtoId);
+        Task<bool> AtualizarStatusPedidoAsync(int pedidoId, int status);
+        Task LimparCarrinhoPorPedidoAsync(int pedidoId);
     }
 }

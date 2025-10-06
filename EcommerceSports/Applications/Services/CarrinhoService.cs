@@ -223,5 +223,15 @@ namespace EcommerceSports.Applications.Services
 
             return await ObterCarrinhoAsync(clienteId);
         }
+
+        public async Task<bool> AtualizarStatusPedidoAsync(int pedidoId, int status)
+        {
+            return await _carrinhoRepository.AtualizarStatusPedidoAsync(pedidoId, status);
+        }
+
+        public async Task LimparCarrinhoPorPedidoAsync(int pedidoId)
+        {
+            await _carrinhoRepository.LimparCarrinhoAsync(pedidoId);
+        }
     }
 }

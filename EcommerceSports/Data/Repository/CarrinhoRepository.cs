@@ -115,5 +115,25 @@ namespace EcommerceSports.Data.Repository
         {
             return await _context.Produtos.FindAsync(produtoId);
         }
+
+        public async Task<List<ItemPedido>> ObterItensPedidoAsync(int pedidoId)
+        {
+            return await _context.ItensPedido
+                .Where(i => i.PedidoId == pedidoId)
+                .ToListAsync();
+        }
+
+        public async Task<bool> AtualizarStatusPedidoAsync(int pedidoId, int status)
+        {
+            var pedido = await _context.Pedidos.FindAsync(pedidoId);
+            if (pedido == null)
+            {
+                return false;
+            }
+
+            pedido.StatusPedido = (StatusPedido)status;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
