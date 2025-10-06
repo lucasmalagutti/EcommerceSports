@@ -34,5 +34,13 @@ namespace EcommerceSports.Applications.DTO
         public StatusTransacao StatusTransacao { get; set; }
         public DateTime DataTransacao { get; set; }
         public string Mensagem { get; set; } = string.Empty;
+        public List<ItemPedidoDTO> Itens { get; set; } = new List<ItemPedidoDTO>();
+    }
+    public class ItemPedidoDTO
+    {
+        public int ProdutoId { get; set; }
+        public string NomeProduto { get; set; } = string.Empty;
+        public decimal PrecoUnitario { get; set; }
+        public int Quantidade { get; set; }
     }
 }

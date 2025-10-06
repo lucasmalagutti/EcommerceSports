@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+
 using EcommerceSports.Models.Enums;
 
 namespace EcommerceSports.Models.Entity

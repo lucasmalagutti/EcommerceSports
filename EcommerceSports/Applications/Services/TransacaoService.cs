@@ -3,6 +3,7 @@ using EcommerceSports.Applications.Services.Interfaces;
 using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
 using EcommerceSports.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceSports.Applications.Services
 {
@@ -113,10 +114,14 @@ namespace EcommerceSports.Applications.Services
 
         public async Task<IEnumerable<ResponseTransacaoDTO>> ObterTransacoesPorCliente(int clienteId)
         {
-            var transacoes = await _transacaoRepository
-         .ObterPorCliente(clienteId);
+            var transacoes = await _transacaoRepository.Transacoes
+        .Include(t => t.Pedido)
+            .ThenInclude(p => p.Itens)
+                .ThenInclude(i => i.Produto)
+        .Include(t => t.Endereco)
+        .Where(t => t.Pedido.ClienteId == clienteId)
+        .ToListAsync();
 
-            // Caso queira converter para DTO
             return transacoes.Select(t => new ResponseTransacaoDTO
             {
                 Id = t.Id,
@@ -124,8 +129,18 @@ namespace EcommerceSports.Applications.Services
                 ValorTotal = t.ValorTotal,
                 ValorFrete = t.ValorFrete,
                 StatusTransacao = t.StatusTransacao,
-                DataTransacao = t.DataTransacao, 
-                ClienteId = t.Pedido?.ClienteId ?? 0
+                DataTransacao = t.DataTransacao,
+                ClienteId = t.Pedido?.ClienteId ?? 0,
+                EnderecoId = t.EnderecoId,
+
+                // 🔹 Mapeia os itens do pedido
+                Itens = t.Pedido?.Itens.Select(i => new ItemPedidoDTO
+                {
+                    ProdutoId = i.ProdutoId,
+                    NomeProduto = i.Produto?.Nome ?? "Produto não informado",
+                    PrecoUnitario = i.Produto?.Preco ?? 0,
+                    Quantidade = i.Quantidade
+                }).ToList() ?? new List<ItemPedidoDTO>()
             }).ToList();
         }
     }
