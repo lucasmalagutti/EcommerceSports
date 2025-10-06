@@ -3,6 +3,7 @@ using System;
 using EcommerceSports.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcommerceSports.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251006021041_Cupom")]
+    partial class Cupom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -314,6 +317,9 @@ namespace EcommerceSports.Migrations
                     b.Property<int>("CartaoId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("CupomId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("DataTransacao")
                         .HasColumnType("timestamp with time zone");
 
@@ -335,6 +341,8 @@ namespace EcommerceSports.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CartaoId");
+
+                    b.HasIndex("CupomId");
 
                     b.HasIndex("EnderecoId");
 
@@ -415,6 +423,10 @@ namespace EcommerceSports.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("EcommerceSports.Models.Entity.Cupom", "Cupom")
+                        .WithMany()
+                        .HasForeignKey("CupomId");
+
                     b.HasOne("EcommerceSports.Models.Entity.Endereco", "Endereco")
                         .WithMany()
                         .HasForeignKey("EnderecoId")
@@ -428,6 +440,8 @@ namespace EcommerceSports.Migrations
                         .IsRequired();
 
                     b.Navigation("Cartao");
+
+                    b.Navigation("Cupom");
 
                     b.Navigation("Endereco");
 

@@ -27,6 +27,10 @@ builder.Services.AddScoped<ITelefoneRepository, TelefoneRepository>();
 builder.Services.AddScoped<IValidators, Validators>();
 builder.Services.AddScoped<ICarrinhoService, CarrinhoService>();
 builder.Services.AddScoped<ICarrinhoRepository, CarrinhoRepository>();
+builder.Services.AddScoped<ICupomService, CupomService>();
+builder.Services.AddScoped<ICupomRepository, CupomRepository>();
+builder.Services.AddScoped<ITransacaoService, TransacaoService>();
+builder.Services.AddScoped<ITransacaoRepository, TransacaoRepository>();
 
 builder.Services.AddCors(options =>
 {
