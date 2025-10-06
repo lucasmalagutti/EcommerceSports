@@ -39,7 +39,7 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("/Transacao/Listar/{id}")]
         public async Task<ActionResult<ResponseTransacaoDTO>> ObterTransacaoPorId(int id)
         {
             try
