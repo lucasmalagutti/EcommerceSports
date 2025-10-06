@@ -49,7 +49,6 @@ namespace EcommerceSports.Data.Repository
         .Include(t => t.Pedido)
         .ThenInclude(p => p.Cliente)
         .Include(t => t.Endereco)
-        .Include(t => t.Cartao)
         .Where(t => t.Pedido.ClienteId == clienteId)
         .ToListAsync();
         }
