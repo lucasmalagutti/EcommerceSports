@@ -77,8 +77,8 @@ namespace EcommerceSports.Applications.Services
             // Alterar status do pedido para "Em Transporte" (2)
             await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 2);
 
-            // Limpar o carrinho (remover todos os itens)
-            await _carrinhoService.LimparCarrinhoPorPedidoAsync(criarDto.PedidoId);
+            // NOTA: Não limpamos os itens do pedido finalizado para manter o histórico
+            // O sistema criará automaticamente um novo carrinho vazio para futuras compras
 
             // Retornar a resposta com os pagamentos
             return new ResponseTransacaoComPagamentosDTO
@@ -99,7 +99,7 @@ namespace EcommerceSports.Applications.Services
                     StatusPagamento = p.StatusPagamento,
                     DataPagamento = p.DataPagamento
                 }).ToList(),
-                Mensagem = "Transação criada com sucesso, estoque atualizado e carrinho limpo"
+                Mensagem = "Transação criada com sucesso, estoque atualizado e pedido finalizado"
             };
         }
 

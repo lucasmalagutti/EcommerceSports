@@ -33,6 +33,8 @@ namespace EcommerceSports.Data.Repository
         {
             return await _context.Transacoes
                 .Include(t => t.Pedido)
+                    .ThenInclude(p => p!.Itens)
+                        .ThenInclude(i => i.Produto)
                 .Include(t => t.Endereco)
                 .FirstOrDefaultAsync(t => t.PedidoId == pedidoId);
         }
@@ -46,12 +48,12 @@ namespace EcommerceSports.Data.Repository
         public async Task<IEnumerable<Transacao>> ObterPorCliente(int clienteId)
         {
             return await _context.Transacoes
-        .Include(t => t.Pedido)
-            .ThenInclude(p => p.Itens)
-                .ThenInclude(i => i.Produto)
-        .Include(t => t.Endereco)
-        .Where(t => t.Pedido.ClienteId == clienteId)
-        .ToListAsync();
+                .Include(t => t.Pedido)
+                    .ThenInclude(p => p!.Itens)
+                        .ThenInclude(i => i.Produto)
+                .Include(t => t.Endereco)
+                .Where(t => t.Pedido!.ClienteId == clienteId)
+                .ToListAsync();
         }
     }
 }

@@ -52,8 +52,8 @@ namespace EcommerceSports.Applications.Services
             // Alterar status do pedido para "Em Transporte" (2)
             await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 2);
 
-            // Limpar o carrinho (remover todos os itens)
-            await _carrinhoService.LimparCarrinhoPorPedidoAsync(criarDto.PedidoId);
+            // NOTA: Não limpamos os itens do pedido finalizado para manter o histórico
+            // O sistema criará automaticamente um novo carrinho vazio para futuras compras
 
             return new ResponseTransacaoDTO
             {
@@ -64,7 +64,7 @@ namespace EcommerceSports.Applications.Services
                 EnderecoId = transacaoCriada.EnderecoId,
                 StatusTransacao = transacaoCriada.StatusTransacao,
                 DataTransacao = transacaoCriada.DataTransacao,
-                Mensagem = "Transação criada com sucesso, estoque atualizado e carrinho limpo"
+                Mensagem = "Transação criada com sucesso, estoque atualizado e pedido finalizado"
             };
         }
 
@@ -108,7 +108,15 @@ namespace EcommerceSports.Applications.Services
                 EnderecoId = transacao.EnderecoId,
                 StatusTransacao = transacao.StatusTransacao,
                 DataTransacao = transacao.DataTransacao,
-                Mensagem = "Transação encontrada"
+                ClienteId = transacao.Pedido?.ClienteId ?? 0,
+                Mensagem = "Transação encontrada",
+                Itens = transacao.Pedido?.Itens.Select(i => new ItemPedidoDTO
+                {
+                    ProdutoId = i.ProdutoId,
+                    NomeProduto = i.Produto?.Nome ?? "Produto não informado",
+                    PrecoUnitario = (decimal)(i.Produto?.Preco ?? 0),
+                    Quantidade = i.Quantidade
+                }).ToList() ?? new List<ItemPedidoDTO>()
             };
         }
 
