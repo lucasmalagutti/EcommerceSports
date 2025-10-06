@@ -18,6 +18,7 @@ namespace EcommerceSports.Data.Context
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemPedido> ItensPedido { get; set; }
         public DbSet<Transacao> Transacoes { get; set; }
+        public DbSet<Pagamento> Pagamentos { get; set; }
         public DbSet<Cupom> Cupons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -133,6 +134,23 @@ namespace EcommerceSports.Data.Context
                       .WithMany()
                       .HasForeignKey(e => e.EnderecoId)
                       .OnDelete(DeleteBehavior.Restrict);
+                entity.HasMany(e => e.Pagamentos)
+                      .WithOne(p => p.Transacao)
+                      .HasForeignKey(p => p.TransacaoId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuração do Pagamento
+            modelBuilder.Entity<Pagamento>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.DataPagamento).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.Valor).HasColumnType("decimal(18,2)");
+                entity.HasOne(e => e.Transacao)
+                      .WithMany(t => t.Pagamentos)
+                      .HasForeignKey(e => e.TransacaoId)
+                      .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.Cartao)
                       .WithMany()
                       .HasForeignKey(e => e.CartaoId)

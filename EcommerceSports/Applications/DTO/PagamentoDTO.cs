@@ -3,7 +3,27 @@ using EcommerceSports.Models.Enums;
 
 namespace EcommerceSports.Applications.DTO
 {
-    public class CriarTransacaoDTO
+    public class PagamentoDTO
+    {
+        public int Id { get; set; }
+        public int TransacaoId { get; set; }
+        public int CartaoId { get; set; }
+        public decimal Valor { get; set; }
+        public StatusPagamento StatusPagamento { get; set; }
+        public DateTime DataPagamento { get; set; }
+    }
+
+    public class CriarPagamentoDTO
+    {
+        [Required(ErrorMessage = "O ID do cartão é obrigatório")]
+        public int CartaoId { get; set; }
+
+        [Required(ErrorMessage = "O valor é obrigatório")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero")]
+        public decimal Valor { get; set; }
+    }
+
+    public class CriarTransacaoComPagamentosDTO
     {
         [Required(ErrorMessage = "O ID do pedido é obrigatório")]
         public int PedidoId { get; set; }
@@ -19,11 +39,14 @@ namespace EcommerceSports.Applications.DTO
         [Required(ErrorMessage = "O ID do endereço é obrigatório")]
         public int EnderecoId { get; set; }
 
+        [Required(ErrorMessage = "Pelo menos um pagamento é obrigatório")]
+        [MinLength(1, ErrorMessage = "Pelo menos um pagamento deve ser informado")]
+        public List<CriarPagamentoDTO> Pagamentos { get; set; } = new List<CriarPagamentoDTO>();
 
         public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.EmAberto;
     }
 
-    public class ResponseTransacaoDTO
+    public class ResponseTransacaoComPagamentosDTO
     {
         public int Id { get; set; }
         public int PedidoId { get; set; }
@@ -32,6 +55,7 @@ namespace EcommerceSports.Applications.DTO
         public int EnderecoId { get; set; }
         public StatusTransacao StatusTransacao { get; set; }
         public DateTime DataTransacao { get; set; }
+        public List<PagamentoDTO> Pagamentos { get; set; } = new List<PagamentoDTO>();
         public string Mensagem { get; set; } = string.Empty;
     }
 }

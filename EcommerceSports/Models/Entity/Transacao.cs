@@ -10,13 +10,12 @@ namespace EcommerceSports.Models.Entity
         public decimal ValorTotal { get; set; }
         public float ValorFrete { get; set; }
         public int EnderecoId { get; set; }
-        public int CartaoId { get; set; }
         public StatusTransacao StatusTransacao { get; set; }
         public DateTime DataTransacao { get; set; } = DateTime.UtcNow;
 
         public Pedido? Pedido { get; set; }
         public Endereco? Endereco { get; set; }
-        public CartaoCredito? Cartao { get; set; }
+        public List<Pagamento> Pagamentos { get; set; } = new List<Pagamento>();
     }
 }
 

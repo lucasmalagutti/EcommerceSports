@@ -6,20 +6,26 @@ using EcommerceSports.Models.Enums;
 
 namespace EcommerceSports.Applications.Services
 {
-    public class TransacaoService : ITransacaoService
+    public class PagamentoService : IPagamentoService
     {
+        private readonly IPagamentoRepository _pagamentoRepository;
         private readonly ITransacaoRepository _transacaoRepository;
         private readonly IEstoqueService _estoqueService;
         private readonly ICarrinhoService _carrinhoService;
 
-        public TransacaoService(ITransacaoRepository transacaoRepository, IEstoqueService estoqueService, ICarrinhoService carrinhoService)
+        public PagamentoService(
+            IPagamentoRepository pagamentoRepository,
+            ITransacaoRepository transacaoRepository,
+            IEstoqueService estoqueService,
+            ICarrinhoService carrinhoService)
         {
+            _pagamentoRepository = pagamentoRepository;
             _transacaoRepository = transacaoRepository;
             _estoqueService = estoqueService;
             _carrinhoService = carrinhoService;
         }
 
-        public async Task<ResponseTransacaoDTO> CriarTransacaoAsync(CriarTransacaoDTO criarDto)
+        public async Task<ResponseTransacaoComPagamentosDTO> CriarTransacaoComPagamentosAsync(CriarTransacaoComPagamentosDTO criarDto)
         {
             // Verificar se já existe uma transação para este pedido
             if (await _transacaoRepository.ExisteTransacaoParaPedidoAsync(criarDto.PedidoId))
@@ -33,6 +39,14 @@ namespace EcommerceSports.Applications.Services
                 throw new InvalidOperationException("Estoque insuficiente para um ou mais produtos do pedido");
             }
 
+            // Validar se a soma dos pagamentos é igual ao valor total
+            var somaPagamentos = criarDto.Pagamentos.Sum(p => p.Valor);
+            if (somaPagamentos != criarDto.ValorTotal)
+            {
+                throw new ArgumentException($"A soma dos pagamentos ({somaPagamentos:C}) deve ser igual ao valor total ({criarDto.ValorTotal:C})");
+            }
+
+            // Criar a transação
             var transacao = new Transacao
             {
                 PedidoId = criarDto.PedidoId,
@@ -45,6 +59,18 @@ namespace EcommerceSports.Applications.Services
 
             var transacaoCriada = await _transacaoRepository.CriarTransacaoAsync(transacao);
 
+            // Criar os pagamentos
+            var pagamentos = criarDto.Pagamentos.Select(p => new Pagamento
+            {
+                TransacaoId = transacaoCriada.Id,
+                CartaoId = p.CartaoId,
+                Valor = p.Valor,
+                StatusPagamento = StatusPagamento.Pendente,
+                DataPagamento = DateTime.UtcNow
+            }).ToList();
+
+            var pagamentosCriados = await _pagamentoRepository.CriarPagamentosAsync(pagamentos);
+
             // Reduzir o estoque dos produtos após criar a transação
             await _estoqueService.ReduzirEstoquePedidoAsync(criarDto.PedidoId);
 
@@ -54,7 +80,8 @@ namespace EcommerceSports.Applications.Services
             // Limpar o carrinho (remover todos os itens)
             await _carrinhoService.LimparCarrinhoPorPedidoAsync(criarDto.PedidoId);
 
-            return new ResponseTransacaoDTO
+            // Retornar a resposta com os pagamentos
+            return new ResponseTransacaoComPagamentosDTO
             {
                 Id = transacaoCriada.Id,
                 PedidoId = transacaoCriada.PedidoId,
@@ -63,20 +90,31 @@ namespace EcommerceSports.Applications.Services
                 EnderecoId = transacaoCriada.EnderecoId,
                 StatusTransacao = transacaoCriada.StatusTransacao,
                 DataTransacao = transacaoCriada.DataTransacao,
+                Pagamentos = pagamentosCriados.Select(p => new PagamentoDTO
+                {
+                    Id = p.Id,
+                    TransacaoId = p.TransacaoId,
+                    CartaoId = p.CartaoId,
+                    Valor = p.Valor,
+                    StatusPagamento = p.StatusPagamento,
+                    DataPagamento = p.DataPagamento
+                }).ToList(),
                 Mensagem = "Transação criada com sucesso, estoque atualizado e carrinho limpo"
             };
         }
 
-        public async Task<ResponseTransacaoDTO> ObterTransacaoPorIdAsync(int id)
+        public async Task<ResponseTransacaoComPagamentosDTO> ObterTransacaoComPagamentosAsync(int transacaoId)
         {
-            var transacao = await _transacaoRepository.ObterTransacaoPorIdAsync(id);
+            var transacao = await _transacaoRepository.ObterTransacaoPorIdAsync(transacaoId);
             
             if (transacao == null)
             {
                 throw new ArgumentException("Transação não encontrada");
             }
 
-            return new ResponseTransacaoDTO
+            var pagamentos = await _pagamentoRepository.ObterPagamentosPorTransacaoAsync(transacaoId);
+
+            return new ResponseTransacaoComPagamentosDTO
             {
                 Id = transacao.Id,
                 PedidoId = transacao.PedidoId,
@@ -85,30 +123,32 @@ namespace EcommerceSports.Applications.Services
                 EnderecoId = transacao.EnderecoId,
                 StatusTransacao = transacao.StatusTransacao,
                 DataTransacao = transacao.DataTransacao,
+                Pagamentos = pagamentos.Select(p => new PagamentoDTO
+                {
+                    Id = p.Id,
+                    TransacaoId = p.TransacaoId,
+                    CartaoId = p.CartaoId,
+                    Valor = p.Valor,
+                    StatusPagamento = p.StatusPagamento,
+                    DataPagamento = p.DataPagamento
+                }).ToList(),
                 Mensagem = "Transação encontrada"
             };
         }
 
-        public async Task<ResponseTransacaoDTO> ObterTransacaoPorPedidoIdAsync(int pedidoId)
+        public async Task<List<PagamentoDTO>> ObterPagamentosPorTransacaoAsync(int transacaoId)
         {
-            var transacao = await _transacaoRepository.ObterTransacaoPorPedidoIdAsync(pedidoId);
-            
-            if (transacao == null)
-            {
-                throw new ArgumentException("Transação não encontrada para este pedido");
-            }
+            var pagamentos = await _pagamentoRepository.ObterPagamentosPorTransacaoAsync(transacaoId);
 
-            return new ResponseTransacaoDTO
+            return pagamentos.Select(p => new PagamentoDTO
             {
-                Id = transacao.Id,
-                PedidoId = transacao.PedidoId,
-                ValorTotal = transacao.ValorTotal,
-                ValorFrete = transacao.ValorFrete,
-                EnderecoId = transacao.EnderecoId,
-                StatusTransacao = transacao.StatusTransacao,
-                DataTransacao = transacao.DataTransacao,
-                Mensagem = "Transação encontrada"
-            };
+                Id = p.Id,
+                TransacaoId = p.TransacaoId,
+                CartaoId = p.CartaoId,
+                Valor = p.Valor,
+                StatusPagamento = p.StatusPagamento,
+                DataPagamento = p.DataPagamento
+            }).ToList();
         }
     }
 }

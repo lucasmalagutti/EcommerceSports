@@ -3,6 +3,7 @@ using System;
 using EcommerceSports.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcommerceSports.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251006025659_UpdatePagamento")]
+    partial class UpdatePagamento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,7 +57,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("Cartoes", (string)null);
+                    b.ToTable("Cartoes");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Cliente", b =>
@@ -99,7 +102,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes", (string)null);
+                    b.ToTable("Clientes");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Cupom", b =>
@@ -119,7 +122,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cupons", (string)null);
+                    b.ToTable("Cupons");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Endereco", b =>
@@ -181,7 +184,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("Enderecos", (string)null);
+                    b.ToTable("Enderecos");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.ItemPedido", b =>
@@ -210,7 +213,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasIndex("ProdutoId");
 
-                    b.ToTable("ItensPedido", (string)null);
+                    b.ToTable("ItensPedido");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Pagamento", b =>
@@ -242,7 +245,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasIndex("TransacaoId");
 
-                    b.ToTable("Pagamentos", (string)null);
+                    b.ToTable("Pagamentos");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Pedido", b =>
@@ -269,7 +272,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("Pedidos", (string)null);
+                    b.ToTable("Pedidos");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Produto", b =>
@@ -303,7 +306,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Produtos", (string)null);
+                    b.ToTable("Produtos");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Telefone", b =>
@@ -332,7 +335,7 @@ namespace EcommerceSports.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("Telefones", (string)null);
+                    b.ToTable("Telefones");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.Transacao", b =>
@@ -368,7 +371,7 @@ namespace EcommerceSports.Migrations
                     b.HasIndex("PedidoId")
                         .IsUnique();
 
-                    b.ToTable("Transacoes", (string)null);
+                    b.ToTable("Transacoes");
                 });
 
             modelBuilder.Entity("EcommerceSports.Models.Entity.CartaoCredito", b =>

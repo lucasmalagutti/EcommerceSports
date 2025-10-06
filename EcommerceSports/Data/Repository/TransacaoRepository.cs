@@ -26,7 +26,6 @@ namespace EcommerceSports.Data.Repository
             return await _context.Transacoes
                 .Include(t => t.Pedido)
                 .Include(t => t.Endereco)
-                .Include(t => t.Cartao)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -35,7 +34,6 @@ namespace EcommerceSports.Data.Repository
             return await _context.Transacoes
                 .Include(t => t.Pedido)
                 .Include(t => t.Endereco)
-                .Include(t => t.Cartao)
                 .FirstOrDefaultAsync(t => t.PedidoId == pedidoId);
         }
 
