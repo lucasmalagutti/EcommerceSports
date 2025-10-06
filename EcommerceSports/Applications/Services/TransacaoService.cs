@@ -22,13 +22,11 @@ namespace EcommerceSports.Applications.Services
 
         public async Task<ResponseTransacaoDTO> CriarTransacaoAsync(CriarTransacaoDTO criarDto)
         {
-            // Verificar se já existe uma transação para este pedido
             if (await _transacaoRepository.ExisteTransacaoParaPedidoAsync(criarDto.PedidoId))
             {
                 throw new InvalidOperationException("Já existe uma transação para este pedido");
             }
 
-            // Verificar se há estoque disponível para todos os produtos do pedido
             if (!await _estoqueService.VerificarEstoquePedidoAsync(criarDto.PedidoId))
             {
                 throw new InvalidOperationException("Estoque insuficiente para um ou mais produtos do pedido");
@@ -46,14 +44,10 @@ namespace EcommerceSports.Applications.Services
 
             var transacaoCriada = await _transacaoRepository.CriarTransacaoAsync(transacao);
 
-            // Reduzir o estoque dos produtos após criar a transação
             await _estoqueService.ReduzirEstoquePedidoAsync(criarDto.PedidoId);
 
-            // Alterar status do pedido para "Em Transporte" (2)
             await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 2);
 
-            // NOTA: Não limpamos os itens do pedido finalizado para manter o histórico
-            // O sistema criará automaticamente um novo carrinho vazio para futuras compras
 
             return new ResponseTransacaoDTO
             {

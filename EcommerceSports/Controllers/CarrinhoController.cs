@@ -15,9 +15,6 @@ namespace EcommerceSports.Controllers
             _carrinhoService = carrinhoService;
         }
 
-        /// <summary>
-        /// Obter carrinho do cliente
-        /// </summary>
         [HttpGet("{clienteId}")]
         public async Task<ActionResult<ResponseCarrinhoDTO>> ObterCarrinho(int clienteId)
         {
@@ -32,9 +29,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Adicionar item ao carrinho
-        /// </summary>
         [HttpPost("{clienteId}/adicionar")]
         public async Task<ActionResult<ResponseCarrinhoDTO>> AdicionarItem(int clienteId, [FromBody] ItemCarrinhoDTO itemDto)
         {
@@ -53,9 +47,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Atualizar quantidade de um item no carrinho
-        /// </summary>
         [HttpPut("{clienteId}/atualizar")]
         public async Task<ActionResult<ResponseCarrinhoDTO>> AtualizarItem(int clienteId, [FromBody] AtualizarCarrinhoDTO atualizarDto)
         {
@@ -78,9 +69,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Remover item do carrinho
-        /// </summary>
         [HttpDelete("{clienteId}/remover/{produtoId}")]
         public async Task<ActionResult<ResponseCarrinhoDTO>> RemoverItem(int clienteId, int produtoId)
         {
@@ -99,9 +87,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Limpar carrinho
-        /// </summary>
         [HttpDelete("{clienteId}/limpar")]
         public async Task<ActionResult<ResponseCarrinhoDTO>> LimparCarrinho(int clienteId)
         {
@@ -116,9 +101,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Finalizar carrinho (converter em pedido)
-        /// </summary>
         [HttpPost("{clienteId}/finalizar")]
         public async Task<ActionResult> FinalizarCarrinho(int clienteId)
         {
@@ -137,9 +119,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Adicionar quantidade de um item no carrinho
-        /// </summary>
         [HttpPost("{clienteId}/adicionar-qtd")]
         public async Task<ActionResult<ResponseCarrinhoDTO>> AdicionarQuantidade(int clienteId, [FromBody] AlterarQuantidadeDTO alterarDto)
         {
@@ -162,9 +141,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Diminuir quantidade de um item no carrinho
-        /// </summary>
         [HttpPost("{clienteId}/diminuir-qtd")]
         public async Task<ActionResult<ResponseCarrinhoDTO>> DiminuirQuantidade(int clienteId, [FromBody] AlterarQuantidadeDTO alterarDto)
         {

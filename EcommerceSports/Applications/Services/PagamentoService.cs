@@ -27,26 +27,22 @@ namespace EcommerceSports.Applications.Services
 
         public async Task<ResponseTransacaoComPagamentosDTO> CriarTransacaoComPagamentosAsync(CriarTransacaoComPagamentosDTO criarDto)
         {
-            // Verificar se já existe uma transação para este pedido
             if (await _transacaoRepository.ExisteTransacaoParaPedidoAsync(criarDto.PedidoId))
             {
                 throw new InvalidOperationException("Já existe uma transação para este pedido");
             }
 
-            // Verificar se há estoque disponível para todos os produtos do pedido
             if (!await _estoqueService.VerificarEstoquePedidoAsync(criarDto.PedidoId))
             {
                 throw new InvalidOperationException("Estoque insuficiente para um ou mais produtos do pedido");
             }
 
-            // Validar se a soma dos pagamentos é igual ao valor total
             var somaPagamentos = criarDto.Pagamentos.Sum(p => p.Valor);
             if (somaPagamentos != criarDto.ValorTotal)
             {
                 throw new ArgumentException($"A soma dos pagamentos ({somaPagamentos:C}) deve ser igual ao valor total ({criarDto.ValorTotal:C})");
             }
 
-            // Criar a transação
             var transacao = new Transacao
             {
                 PedidoId = criarDto.PedidoId,
@@ -59,7 +55,6 @@ namespace EcommerceSports.Applications.Services
 
             var transacaoCriada = await _transacaoRepository.CriarTransacaoAsync(transacao);
 
-            // Criar os pagamentos
             var pagamentos = criarDto.Pagamentos.Select(p => new Pagamento
             {
                 TransacaoId = transacaoCriada.Id,
@@ -71,16 +66,12 @@ namespace EcommerceSports.Applications.Services
 
             var pagamentosCriados = await _pagamentoRepository.CriarPagamentosAsync(pagamentos);
 
-            // Reduzir o estoque dos produtos após criar a transação
             await _estoqueService.ReduzirEstoquePedidoAsync(criarDto.PedidoId);
 
-            // Alterar status do pedido para "Em Transporte" (2)
             await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 2);
 
-            // NOTA: Não limpamos os itens do pedido finalizado para manter o histórico
-            // O sistema criará automaticamente um novo carrinho vazio para futuras compras
 
-            // Retornar a resposta com os pagamentos
+
             return new ResponseTransacaoComPagamentosDTO
             {
                 Id = transacaoCriada.Id,

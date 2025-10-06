@@ -15,9 +15,6 @@ namespace EcommerceSports.Controllers
             _pagamentoService = pagamentoService;
         }
 
-        /// <summary>
-        /// Criar transação com múltiplos pagamentos
-        /// </summary>
         [HttpPost("transacao")]
         public async Task<ActionResult<ResponseTransacaoComPagamentosDTO>> CriarTransacaoComPagamentos([FromBody] CriarTransacaoComPagamentosDTO criarDto)
         {
@@ -49,9 +46,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Obter transação com pagamentos por ID
-        /// </summary>
         [HttpGet("transacao/{id}")]
         public async Task<ActionResult<ResponseTransacaoComPagamentosDTO>> ObterTransacaoComPagamentos(int id)
         {
@@ -76,9 +70,6 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        /// <summary>
-        /// Obter pagamentos por transação
-        /// </summary>
         [HttpGet("transacao/{transacaoId}/pagamentos")]
         public async Task<ActionResult<List<PagamentoDTO>>> ObterPagamentosPorTransacao(int transacaoId)
         {

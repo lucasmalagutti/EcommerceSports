@@ -25,7 +25,6 @@ namespace EcommerceSports.Data.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configuração do Cliente
             modelBuilder.Entity<Cliente>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -33,12 +32,10 @@ namespace EcommerceSports.Data.Context
                 entity.Property(e => e.DtCadastro).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.CadastroAtivo).HasDefaultValue(true);
                 
-                // Configurar propriedades de data para usar UTC
                 entity.Property(e => e.DtNasc).HasColumnType("timestamp with time zone");
                 entity.Property(e => e.DtCadastro).HasColumnType("timestamp with time zone");
             });
 
-            // Configuração do Endereco
             modelBuilder.Entity<Endereco>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -49,7 +46,6 @@ namespace EcommerceSports.Data.Context
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração do Telefone
             modelBuilder.Entity<Telefone>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -60,7 +56,6 @@ namespace EcommerceSports.Data.Context
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração do CartaoCredito
             modelBuilder.Entity<CartaoCredito>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -71,7 +66,6 @@ namespace EcommerceSports.Data.Context
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração do Produto
             modelBuilder.Entity<Produto>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -82,7 +76,6 @@ namespace EcommerceSports.Data.Context
                 entity.Property(e => e.Imagem);
             });
 
-            // Configuração do Cupom
             modelBuilder.Entity<Cupom>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -90,7 +83,6 @@ namespace EcommerceSports.Data.Context
                 entity.Property(e => e.Nome).IsRequired();
             });
 
-            // Configuração do Pedido
             modelBuilder.Entity<Pedido>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -103,7 +95,6 @@ namespace EcommerceSports.Data.Context
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração do ItemPedido
             modelBuilder.Entity<ItemPedido>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -118,7 +109,6 @@ namespace EcommerceSports.Data.Context
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Configuração da Transacao
             modelBuilder.Entity<Transacao>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -140,7 +130,6 @@ namespace EcommerceSports.Data.Context
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração do Pagamento
             modelBuilder.Entity<Pagamento>(entity =>
             {
                 entity.HasKey(e => e.Id);
