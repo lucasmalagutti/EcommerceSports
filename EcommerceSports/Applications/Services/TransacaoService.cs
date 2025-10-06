@@ -114,5 +114,23 @@ namespace EcommerceSports.Applications.Services
                 Mensagem = "Transação encontrada"
             };
         }
+
+        public async Task<IEnumerable<ResponseTransacaoDTO>> ObterTransacoesPorCliente(int clienteId)
+        {
+            var transacoes = await _transacaoRepository
+         .ObterPorCliente(clienteId);
+
+            // Caso queira converter para DTO
+            return transacoes.Select(t => new ResponseTransacaoDTO
+            {
+                Id = t.Id,
+                PedidoId = t.PedidoId,
+                ValorTotal = t.ValorTotal,
+                ValorFrete = t.ValorFrete,
+                StatusTransacao = t.StatusTransacao,
+                DataTransacao = t.DataTransacao, 
+                ClienteId = t.Pedido?.ClienteId ?? 0
+            }).ToList();
+        }
     }
 }

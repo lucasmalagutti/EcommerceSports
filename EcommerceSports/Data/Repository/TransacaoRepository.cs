@@ -44,5 +44,16 @@ namespace EcommerceSports.Data.Repository
             return await _context.Transacoes
                 .AnyAsync(t => t.PedidoId == pedidoId);
         }
+
+        public async Task<IEnumerable<Transacao>> ObterPorCliente(int clienteId)
+        {
+            return await _context.Transacoes
+        .Include(t => t.Pedido)
+        .ThenInclude(p => p.Cliente)
+        .Include(t => t.Endereco)
+        .Include(t => t.Cartao)
+        .Where(t => t.Pedido.ClienteId == clienteId)
+        .ToListAsync();
+        }
     }
 }
