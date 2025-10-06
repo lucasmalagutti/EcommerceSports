@@ -31,6 +31,8 @@ builder.Services.AddScoped<ICupomService, CupomService>();
 builder.Services.AddScoped<ICupomRepository, CupomRepository>();
 builder.Services.AddScoped<ITransacaoService, TransacaoService>();
 builder.Services.AddScoped<ITransacaoRepository, TransacaoRepository>();
+builder.Services.AddScoped<IEstoqueService, EstoqueService>();
+builder.Services.AddScoped<IEstoqueRepository, EstoqueRepository>();
 
 builder.Services.AddCors(options =>
 {

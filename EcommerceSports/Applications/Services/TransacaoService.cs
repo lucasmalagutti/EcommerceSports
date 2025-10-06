@@ -9,10 +9,14 @@ namespace EcommerceSports.Applications.Services
     public class TransacaoService : ITransacaoService
     {
         private readonly ITransacaoRepository _transacaoRepository;
+        private readonly IEstoqueService _estoqueService;
+        private readonly ICarrinhoService _carrinhoService;
 
-        public TransacaoService(ITransacaoRepository transacaoRepository)
+        public TransacaoService(ITransacaoRepository transacaoRepository, IEstoqueService estoqueService, ICarrinhoService carrinhoService)
         {
             _transacaoRepository = transacaoRepository;
+            _estoqueService = estoqueService;
+            _carrinhoService = carrinhoService;
         }
 
         public async Task<ResponseTransacaoDTO> CriarTransacaoAsync(CriarTransacaoDTO criarDto)
@@ -21,6 +25,12 @@ namespace EcommerceSports.Applications.Services
             if (await _transacaoRepository.ExisteTransacaoParaPedidoAsync(criarDto.PedidoId))
             {
                 throw new InvalidOperationException("Já existe uma transação para este pedido");
+            }
+
+            // Verificar se há estoque disponível para todos os produtos do pedido
+            if (!await _estoqueService.VerificarEstoquePedidoAsync(criarDto.PedidoId))
+            {
+                throw new InvalidOperationException("Estoque insuficiente para um ou mais produtos do pedido");
             }
 
             var transacao = new Transacao
@@ -36,6 +46,15 @@ namespace EcommerceSports.Applications.Services
 
             var transacaoCriada = await _transacaoRepository.CriarTransacaoAsync(transacao);
 
+            // Reduzir o estoque dos produtos após criar a transação
+            await _estoqueService.ReduzirEstoquePedidoAsync(criarDto.PedidoId);
+
+            // Alterar status do pedido para "Em Transporte" (2)
+            await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 2);
+
+            // Limpar o carrinho (remover todos os itens)
+            await _carrinhoService.LimparCarrinhoPorPedidoAsync(criarDto.PedidoId);
+
             return new ResponseTransacaoDTO
             {
                 Id = transacaoCriada.Id,
@@ -46,7 +65,7 @@ namespace EcommerceSports.Applications.Services
                 CartaoId = transacaoCriada.CartaoId,
                 StatusTransacao = transacaoCriada.StatusTransacao,
                 DataTransacao = transacaoCriada.DataTransacao,
-                Mensagem = "Transação criada com sucesso"
+                Mensagem = "Transação criada com sucesso, estoque atualizado e carrinho limpo"
             };
         }
 

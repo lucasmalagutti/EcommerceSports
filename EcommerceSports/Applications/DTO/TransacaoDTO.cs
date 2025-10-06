@@ -22,7 +22,7 @@ namespace EcommerceSports.Applications.DTO
         [Required(ErrorMessage = "O ID do cartão é obrigatório")]
         public int CartaoId { get; set; }
 
-        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.Pentende;
+        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.EmAberto;
     }
 
     public class ResponseTransacaoDTO

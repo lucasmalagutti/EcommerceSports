@@ -16,5 +16,7 @@ namespace EcommerceSports.Data.Repository.Interfaces
         Task AtualizarValorTotalPedidoAsync(int pedidoId);
         Task<bool> ExisteProdutoAsync(int produtoId);
         Task<Produto?> ObterProdutoAsync(int produtoId);
+        Task<List<ItemPedido>> ObterItensPedidoAsync(int pedidoId);
+        Task<bool> AtualizarStatusPedidoAsync(int pedidoId, int status);
     }
 }
