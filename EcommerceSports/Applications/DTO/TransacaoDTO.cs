@@ -27,6 +27,7 @@ namespace EcommerceSports.Applications.DTO
     {
         public int Id { get; set; }
         public int PedidoId { get; set; }
+        public int ClienteId { get; set; }
         public decimal ValorTotal { get; set; }
         public float ValorFrete { get; set; }
         public int EnderecoId { get; set; }

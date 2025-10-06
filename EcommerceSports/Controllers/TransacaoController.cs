@@ -39,7 +39,7 @@ namespace EcommerceSports.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("/Transacao/ListarPorId/{id}")]
         public async Task<ActionResult<ResponseTransacaoDTO>> ObterTransacaoPorId(int id)
         {
             try
@@ -62,6 +62,24 @@ namespace EcommerceSports.Controllers
                 });
             }
         }
+        [HttpGet("/Transacao/ListarPorCliente/{clienteId}")]
+        public async Task<ActionResult<IEnumerable<ResponseTransacaoDTO>>> ListarTransacoesPorCliente(int clienteId)
+        {
+            try
+            {
+                var transacoes = await _transacaoService.ObterTransacoesPorCliente(clienteId);
+
+                if (transacoes == null || !transacoes.Any())
+                    return NotFound(new { Mensagem = "Nenhuma transação encontrada para este cliente." });
+
+                return Ok(transacoes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Mensagem = "Erro interno do servidor: " + ex.Message });
+            }
+        }
+
 
         [HttpGet("pedido/{pedidoId}")]
         public async Task<ActionResult<ResponseTransacaoDTO>> ObterTransacaoPorPedidoId(int pedidoId)

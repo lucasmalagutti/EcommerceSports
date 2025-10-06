@@ -8,5 +8,6 @@ namespace EcommerceSports.Data.Repository.Interfaces
         Task<Transacao?> ObterTransacaoPorIdAsync(int id);
         Task<Transacao?> ObterTransacaoPorPedidoIdAsync(int pedidoId);
         Task<bool> ExisteTransacaoParaPedidoAsync(int pedidoId);
+        Task<IEnumerable<Transacao>> ObterPorCliente(int clienteId);
     }
 }
