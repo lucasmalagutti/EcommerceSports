@@ -114,13 +114,7 @@ namespace EcommerceSports.Applications.Services
 
         public async Task<IEnumerable<ResponseTransacaoDTO>> ObterTransacoesPorCliente(int clienteId)
         {
-            var transacoes = await _transacaoRepository.Transacoes
-        .Include(t => t.Pedido)
-            .ThenInclude(p => p.Itens)
-                .ThenInclude(i => i.Produto)
-        .Include(t => t.Endereco)
-        .Where(t => t.Pedido.ClienteId == clienteId)
-        .ToListAsync();
+            var transacoes = await _transacaoRepository.ObterPorCliente(clienteId);
 
             return transacoes.Select(t => new ResponseTransacaoDTO
             {
@@ -133,12 +127,11 @@ namespace EcommerceSports.Applications.Services
                 ClienteId = t.Pedido?.ClienteId ?? 0,
                 EnderecoId = t.EnderecoId,
 
-                // 🔹 Mapeia os itens do pedido
                 Itens = t.Pedido?.Itens.Select(i => new ItemPedidoDTO
                 {
                     ProdutoId = i.ProdutoId,
                     NomeProduto = i.Produto?.Nome ?? "Produto não informado",
-                    PrecoUnitario = i.Produto?.Preco ?? 0,
+                    PrecoUnitario = (decimal)(i.Produto?.Preco ?? 0),
                     Quantidade = i.Quantidade
                 }).ToList() ?? new List<ItemPedidoDTO>()
             }).ToList();

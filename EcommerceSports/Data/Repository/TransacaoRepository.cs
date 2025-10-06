@@ -47,7 +47,8 @@ namespace EcommerceSports.Data.Repository
         {
             return await _context.Transacoes
         .Include(t => t.Pedido)
-        .ThenInclude(p => p.Cliente)
+            .ThenInclude(p => p.Itens)
+                .ThenInclude(i => i.Produto)
         .Include(t => t.Endereco)
         .Where(t => t.Pedido.ClienteId == clienteId)
         .ToListAsync();
