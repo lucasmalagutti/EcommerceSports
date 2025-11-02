@@ -56,14 +56,37 @@ namespace EcommerceSports.Data.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Transacao>> ListarTodasTransacoes()
+        public async Task<Transacao?> AtualizarStatusPedidoAsync(int pedidoId, Models.Enums.StatusPedido novoStatus)
         {
-            return await _context.Transacoes
-             .Include(t => t.Pedido)
-                 .ThenInclude(p => p.Itens)
-                     .ThenInclude(i => i.Produto)
-             .Include(t => t.Endereco)
-             .ToListAsync();
+            var transacao = await _context.Transacoes
+                .Include(t => t.Pedido)
+                .FirstOrDefaultAsync(t => t.PedidoId == pedidoId);
+
+            if (transacao == null || transacao.Pedido == null)
+            {
+                return null;
+            }
+
+            transacao.Pedido.StatusPedido = novoStatus;
+            await _context.SaveChangesAsync();
+
+            return transacao;
+        }
+
+        public async Task<Transacao?> AtualizarStatusTransacaoAsync(int transacaoId, Models.Enums.StatusTransacao novoStatus)
+        {
+            var transacao = await _context.Transacoes
+                .FirstOrDefaultAsync(t => t.Id == transacaoId);
+
+            if (transacao == null)
+            {
+                return null;
+            }
+
+            transacao.StatusTransacao = novoStatus;
+            await _context.SaveChangesAsync();
+
+            return transacao;
         }
     }
 }

@@ -1,4 +1,4 @@
-using EcommerceSports.Applications.DTO;
+﻿using EcommerceSports.Applications.DTO;
 using EcommerceSports.Applications.Services.Interfaces;
 using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
@@ -22,13 +22,11 @@ namespace EcommerceSports.Applications.Services
 
         public async Task<ResponseTransacaoDTO> CriarTransacaoAsync(CriarTransacaoDTO criarDto)
         {
-            // Verificar se já existe uma transação para este pedido
             if (await _transacaoRepository.ExisteTransacaoParaPedidoAsync(criarDto.PedidoId))
             {
-                throw new InvalidOperationException("Já existe uma transação para este pedido");
+                throw new InvalidOperationException("JÃ¡ existe uma transaÃ§Ã£o para este pedido");
             }
 
-            // Verificar se há estoque disponível para todos os produtos do pedido
             if (!await _estoqueService.VerificarEstoquePedidoAsync(criarDto.PedidoId))
             {
                 throw new InvalidOperationException("Estoque insuficiente para um ou mais produtos do pedido");
@@ -46,14 +44,10 @@ namespace EcommerceSports.Applications.Services
 
             var transacaoCriada = await _transacaoRepository.CriarTransacaoAsync(transacao);
 
-            // Reduzir o estoque dos produtos após criar a transação
             await _estoqueService.ReduzirEstoquePedidoAsync(criarDto.PedidoId);
 
-            // Alterar status do pedido para "Em Transporte" (2)
-            await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 2);
+            await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 6); // Status inicial: AguardandoConfirmacao = 6
 
-            // NOTA: Não limpamos os itens do pedido finalizado para manter o histórico
-            // O sistema criará automaticamente um novo carrinho vazio para futuras compras
 
             return new ResponseTransacaoDTO
             {
@@ -63,8 +57,10 @@ namespace EcommerceSports.Applications.Services
                 ValorFrete = transacaoCriada.ValorFrete,
                 EnderecoId = transacaoCriada.EnderecoId,
                 StatusTransacao = transacaoCriada.StatusTransacao,
+                StatusPedido = transacaoCriada.Pedido?.StatusPedido,
                 DataTransacao = transacaoCriada.DataTransacao,
-                Mensagem = "Transação criada com sucesso, estoque atualizado e pedido finalizado"
+                ClienteId = transacaoCriada.Pedido?.ClienteId ?? 0,
+                Mensagem = "TransaÃ§Ã£o criada com sucesso, estoque atualizado e pedido finalizado"
             };
         }
 
@@ -103,7 +99,7 @@ namespace EcommerceSports.Applications.Services
             
             if (transacao == null)
             {
-                throw new ArgumentException("Transação não encontrada");
+                throw new ArgumentException("TransaÃ§Ã£o nÃ£o encontrada");
             }
 
             return new ResponseTransacaoDTO
@@ -114,8 +110,10 @@ namespace EcommerceSports.Applications.Services
                 ValorFrete = transacao.ValorFrete,
                 EnderecoId = transacao.EnderecoId,
                 StatusTransacao = transacao.StatusTransacao,
+                StatusPedido = transacao.Pedido?.StatusPedido,
                 DataTransacao = transacao.DataTransacao,
-                Mensagem = "Transação encontrada"
+                ClienteId = transacao.Pedido?.ClienteId ?? 0,
+                Mensagem = "TransaÃ§Ã£o encontrada"
             };
         }
 
@@ -125,7 +123,7 @@ namespace EcommerceSports.Applications.Services
             
             if (transacao == null)
             {
-                throw new ArgumentException("Transação não encontrada para este pedido");
+                throw new ArgumentException("TransaÃ§Ã£o nÃ£o encontrada para este pedido");
             }
 
             return new ResponseTransacaoDTO
@@ -136,13 +134,14 @@ namespace EcommerceSports.Applications.Services
                 ValorFrete = transacao.ValorFrete,
                 EnderecoId = transacao.EnderecoId,
                 StatusTransacao = transacao.StatusTransacao,
+                StatusPedido = transacao.Pedido?.StatusPedido,
                 DataTransacao = transacao.DataTransacao,
                 ClienteId = transacao.Pedido?.ClienteId ?? 0,
-                Mensagem = "Transação encontrada",
+                Mensagem = "TransaÃ§Ã£o encontrada",
                 Itens = transacao.Pedido?.Itens.Select(i => new ItemPedidoDTO
                 {
                     ProdutoId = i.ProdutoId,
-                    NomeProduto = i.Produto?.Nome ?? "Produto não informado",
+                    NomeProduto = i.Produto?.Nome ?? "Produto nÃ£o informado",
                     PrecoUnitario = (decimal)(i.Produto?.Preco ?? 0),
                     Quantidade = i.Quantidade
                 }).ToList() ?? new List<ItemPedidoDTO>()
@@ -160,18 +159,96 @@ namespace EcommerceSports.Applications.Services
                 ValorTotal = t.ValorTotal,
                 ValorFrete = t.ValorFrete,
                 StatusTransacao = t.StatusTransacao,
+                StatusPedido = t.Pedido?.StatusPedido,
                 DataTransacao = t.DataTransacao,
                 ClienteId = t.Pedido?.ClienteId ?? 0,
                 EnderecoId = t.EnderecoId,
-
                 Itens = t.Pedido?.Itens.Select(i => new ItemPedidoDTO
+                {
+                    ProdutoId = i.ProdutoId,
+                    NomeProduto = i.Produto?.Nome ?? "Produto nÃ£o informado",
+                    PrecoUnitario = (decimal)(i.Produto?.Preco ?? 0),
+                    Quantidade = i.Quantidade
+                }).ToList() ?? new List<ItemPedidoDTO>()
+            }).ToList();
+        }
+
+        public async Task<ResponseTransacaoDTO> AtualizarStatusPedidoAsync(int pedidoId, Models.Enums.StatusPedido novoStatus)
+        {
+            var transacao = await _transacaoRepository.AtualizarStatusPedidoAsync(pedidoId, novoStatus);
+
+            if (transacao == null)
+            {
+                throw new ArgumentException("TransaÃ§Ã£o nÃ£o encontrada para este pedido");
+            }
+
+            // Buscar a transaÃ§Ã£o atualizada com todos os dados
+            var transacaoCompleta = await _transacaoRepository.ObterTransacaoPorPedidoIdAsync(pedidoId);
+
+            if (transacaoCompleta == null)
+            {
+                throw new ArgumentException("Erro ao buscar transaÃ§Ã£o atualizada");
+            }
+
+            return new ResponseTransacaoDTO
+            {
+                Id = transacaoCompleta.Id,
+                PedidoId = transacaoCompleta.PedidoId,
+                ValorTotal = transacaoCompleta.ValorTotal,
+                ValorFrete = transacaoCompleta.ValorFrete,
+                EnderecoId = transacaoCompleta.EnderecoId,
+                StatusTransacao = transacaoCompleta.StatusTransacao,
+                StatusPedido = transacaoCompleta.Pedido?.StatusPedido ?? novoStatus,
+                DataTransacao = transacaoCompleta.DataTransacao,
+                ClienteId = transacaoCompleta.Pedido?.ClienteId ?? 0,
+                Mensagem = $"Status do pedido atualizado para {novoStatus} com sucesso",
+                Itens = transacaoCompleta.Pedido?.Itens.Select(i => new ItemPedidoDTO
+                {
+                    ProdutoId = i.ProdutoId,
+                    NomeProduto = i.Produto?.Nome ?? "Produto nÃ£o informado",
+                    PrecoUnitario = (decimal)(i.Produto?.Preco ?? 0),
+                    Quantidade = i.Quantidade
+                }).ToList() ?? new List<ItemPedidoDTO>()
+            };
+        }
+
+        public async Task<ResponseTransacaoDTO> AtualizarStatusTransacaoAsync(int transacaoId, Models.Enums.StatusTransacao novoStatus)
+        {
+            var transacao = await _transacaoRepository.AtualizarStatusTransacaoAsync(transacaoId, novoStatus);
+
+            if (transacao == null)
+            {
+                throw new ArgumentException("Transação não encontrada");
+            }
+
+            // Buscar a transação atualizada com todos os dados
+            var transacaoCompleta = await _transacaoRepository.ObterTransacaoPorIdAsync(transacaoId);
+
+            if (transacaoCompleta == null)
+            {
+                throw new ArgumentException("Erro ao buscar transação atualizada");
+            }
+
+            return new ResponseTransacaoDTO
+            {
+                Id = transacaoCompleta.Id,
+                PedidoId = transacaoCompleta.PedidoId,
+                ValorTotal = transacaoCompleta.ValorTotal,
+                ValorFrete = transacaoCompleta.ValorFrete,
+                EnderecoId = transacaoCompleta.EnderecoId,
+                StatusTransacao = transacaoCompleta.StatusTransacao,
+                StatusPedido = transacaoCompleta.Pedido?.StatusPedido,
+                DataTransacao = transacaoCompleta.DataTransacao,
+                ClienteId = transacaoCompleta.Pedido?.ClienteId ?? 0,
+                Mensagem = $"Status da transação atualizado para {novoStatus} com sucesso",
+                Itens = transacaoCompleta.Pedido?.Itens.Select(i => new ItemPedidoDTO
                 {
                     ProdutoId = i.ProdutoId,
                     NomeProduto = i.Produto?.Nome ?? "Produto não informado",
                     PrecoUnitario = (decimal)(i.Produto?.Preco ?? 0),
                     Quantidade = i.Quantidade
                 }).ToList() ?? new List<ItemPedidoDTO>()
-            }).ToList();
+            };
         }
     }
 }

@@ -70,7 +70,7 @@ namespace EcommerceSports.Controllers
                 var transacoes = await _transacaoService.ObterTransacoesPorCliente(clienteId);
 
                 if (transacoes == null || !transacoes.Any())
-                    return NotFound(new { Mensagem = "Nenhuma transa��o encontrada para este cliente." });
+                    return NotFound(new { Mensagem = "Nenhuma transa��o encontrada para este cliente." });
 
                 return Ok(transacoes);
             }
@@ -104,27 +104,86 @@ namespace EcommerceSports.Controllers
                 });
             }
         }
-        [HttpGet("/Transacao/ListarTodos")]
-        public async Task<ActionResult<IEnumerable<ResponseTransacaoDTO>>> ListarTodasTransacoes()
+
+        [HttpPut("/Transacao/AtualizarStatus/{pedidoId}")]
+        public async Task<ActionResult<ResponseTransacaoDTO>> AtualizarStatusPedido(int pedidoId, [FromBody] AtualizarStatusPedidoRequest request)
         {
             try
             {
-                var transacoes = await _transacaoService.ListarTodasTransacoes();
-                return Ok(transacoes);
+                if (request == null || string.IsNullOrWhiteSpace(request.StatusPedido))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = "O campo 'statusPedido' é obrigatório."
+                    });
+                }
+                
+                // Converter string para enum (case-insensitive)
+                if (!Enum.TryParse<Models.Enums.StatusPedido>(request.StatusPedido, true, out var novoStatus))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = $"Status inválido: '{request.StatusPedido}'. Valores aceitos: EmProcessamento, EmTransporte, Entregue, EmTroca, Trocado, AguardandoConfirmacao"
+                    });
+                }
+                
+                var transacao = await _transacaoService.AtualizarStatusPedidoAsync(pedidoId, novoStatus);
+                return Ok(transacao);
             }
             catch (ArgumentException ex)
             {
-                return NotFound(new List<ResponseTransacaoDTO>
-            {
-                new ResponseTransacaoDTO { Mensagem = ex.Message }
-            });
+                return NotFound(new ResponseTransacaoDTO
+                {
+                    Mensagem = ex.Message
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new List<ResponseTransacaoDTO>
+                return BadRequest(new ResponseTransacaoDTO
+                {
+                    Mensagem = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        [HttpPut("/Transacao/AtualizarStatusTransacao/{transacaoId}")]
+        public async Task<ActionResult<ResponseTransacaoDTO>> AtualizarStatusTransacao(int transacaoId, [FromBody] AtualizarStatusTransacaoRequest request)
+        {
+            try
             {
-                new ResponseTransacaoDTO { Mensagem = "Erro interno do servidor: " + ex.Message }
-            });
+                if (request == null || string.IsNullOrWhiteSpace(request.StatusTransacao))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = "O campo 'statusTransacao' é obrigatório."
+                    });
+                }
+                
+                // Converter string para enum (case-insensitive)
+                if (!Enum.TryParse<Models.Enums.StatusTransacao>(request.StatusTransacao, true, out var novoStatus))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = $"Status inválido: '{request.StatusTransacao}'. Valores aceitos: Aprovado, Reprovado, Pendente"
+                    });
+                }
+                
+                var transacao = await _transacaoService.AtualizarStatusTransacaoAsync(transacaoId, novoStatus);
+                return Ok(transacao);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new ResponseTransacaoDTO
+                {
+                    Mensagem = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseTransacaoDTO
+                {
+                    Mensagem = "Erro interno do servidor: " + ex.Message
+                });
             }
         }
     }

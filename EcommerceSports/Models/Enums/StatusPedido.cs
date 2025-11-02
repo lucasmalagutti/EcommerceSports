@@ -7,7 +7,8 @@ namespace EcommerceSports.Models.Enums
         EmTransporte = 2,
         Entregue = 1,
         EmTroca = 4,
-        Trocado = 5
+        Trocado = 5,
+        AguardandoConfirmacao = 6
     }
 }
 
