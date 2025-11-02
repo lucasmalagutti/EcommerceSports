@@ -6,5 +6,7 @@ namespace EcommerceSports.Data.Repository.Interfaces
     {
         Task<Cupom?> ObterCupomPorNomeAsync(string nome);
         Task<bool> ExisteCupomAsync(string nome);
+        Task<Cupom> CriarCupomAsync(Cupom cupom);
+        Task<bool> MarcarComoUtilizadoAsync(string nome);
     }
 }

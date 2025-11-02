@@ -36,6 +36,8 @@ builder.Services.AddScoped<IEstoqueService, EstoqueService>();
 builder.Services.AddScoped<IEstoqueRepository, EstoqueRepository>();
 builder.Services.AddScoped<IPagamentoService, PagamentoService>();
 builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
+builder.Services.AddScoped<ISolicitacaoTrocaService, SolicitacaoTrocaService>();
+builder.Services.AddScoped<ISolicitacaoTrocaRepository, SolicitacaoTrocaRepository>();
 
 builder.Services.AddCors(options =>
 {

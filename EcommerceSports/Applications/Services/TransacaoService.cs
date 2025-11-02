@@ -140,8 +140,9 @@ namespace EcommerceSports.Applications.Services
                 Mensagem = "TransaÃ§Ã£o encontrada",
                 Itens = transacao.Pedido?.Itens.Select(i => new ItemPedidoDTO
                 {
+                    Id = i.Id,
                     ProdutoId = i.ProdutoId,
-                    NomeProduto = i.Produto?.Nome ?? "Produto nÃ£o informado",
+                    NomeProduto = i.Produto?.Nome ?? "Produto não informado",
                     PrecoUnitario = (decimal)(i.Produto?.Preco ?? 0),
                     Quantidade = i.Quantidade
                 }).ToList() ?? new List<ItemPedidoDTO>()

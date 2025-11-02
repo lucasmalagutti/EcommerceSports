@@ -35,6 +35,16 @@ namespace EcommerceSports.Applications.Services
                 };
             }
 
+            if (cupom.Utilizado)
+            {
+                return new ResponseCupomDTO
+                {
+                    Valido = false,
+                    Nome = cupom.Nome,
+                    Mensagem = "Este cupom já foi utilizado e não pode ser utilizado novamente"
+                };
+            }
+
             return new ResponseCupomDTO
             {
                 Valido = true,

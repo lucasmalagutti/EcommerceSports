@@ -20,6 +20,7 @@ namespace EcommerceSports.Data.Context
         public DbSet<Transacao> Transacoes { get; set; }
         public DbSet<Pagamento> Pagamentos { get; set; }
         public DbSet<Cupom> Cupons { get; set; }
+        public DbSet<SolicitacaoTroca> SolicitacoesTroca { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -81,6 +82,9 @@ namespace EcommerceSports.Data.Context
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.Nome).IsRequired();
+                entity.Property(e => e.Desconto).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Utilizado).HasDefaultValue(false);
+                entity.Property(e => e.DataUtilizacao).HasColumnType("timestamp with time zone");
             });
 
             modelBuilder.Entity<Pedido>(entity =>
@@ -144,6 +148,34 @@ namespace EcommerceSports.Data.Context
                       .WithMany()
                       .HasForeignKey(e => e.CartaoId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<SolicitacaoTroca>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.DataSolicitacao).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.DataAprovacao).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.DataRecebimento).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.Status).HasConversion<int>();
+                entity.Property(e => e.TipoSolicitacao).HasConversion<int>();
+                entity.Property(e => e.ValorCupom).HasColumnType("decimal(18,2)");
+                entity.HasOne(e => e.Pedido)
+                      .WithMany()
+                      .HasForeignKey(e => e.PedidoId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.ItemPedido)
+                      .WithMany()
+                      .HasForeignKey(e => e.ItemPedidoId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Cliente)
+                      .WithMany()
+                      .HasForeignKey(e => e.ClienteId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Cupom)
+                      .WithMany()
+                      .HasForeignKey(e => e.CupomId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

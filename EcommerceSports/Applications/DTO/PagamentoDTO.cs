@@ -44,6 +44,8 @@ namespace EcommerceSports.Applications.DTO
         public List<CriarPagamentoDTO> Pagamentos { get; set; } = new List<CriarPagamentoDTO>();
 
         public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.Pendente;
+
+        public List<string> Cupons { get; set; } = new List<string>();
     }
 
     public class ResponseTransacaoComPagamentosDTO
