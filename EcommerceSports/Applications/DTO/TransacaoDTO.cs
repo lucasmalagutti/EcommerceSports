@@ -32,6 +32,7 @@ namespace EcommerceSports.Applications.DTO
         public float ValorFrete { get; set; }
         public int EnderecoId { get; set; }
         public StatusTransacao StatusTransacao { get; set; }
+        public StatusPedido? StatusPedido { get; set; }
         public DateTime DataTransacao { get; set; }
         public string Mensagem { get; set; } = string.Empty;
         public List<ItemPedidoDTO> Itens { get; set; } = new List<ItemPedidoDTO>();

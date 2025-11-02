@@ -70,7 +70,7 @@ namespace EcommerceSports.Controllers
                 var transacoes = await _transacaoService.ObterTransacoesPorCliente(clienteId);
 
                 if (transacoes == null || !transacoes.Any())
-                    return NotFound(new { Mensagem = "Nenhuma transação encontrada para este cliente." });
+                    return NotFound(new { Mensagem = "Nenhuma transaï¿½ï¿½o encontrada para este cliente." });
 
                 return Ok(transacoes);
             }
@@ -87,6 +87,30 @@ namespace EcommerceSports.Controllers
             try
             {
                 var transacao = await _transacaoService.ObterTransacaoPorPedidoIdAsync(pedidoId);
+                return Ok(transacao);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new ResponseTransacaoDTO
+                {
+                    Mensagem = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseTransacaoDTO
+                {
+                    Mensagem = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        [HttpPut("/Transacao/AtualizarStatus/{pedidoId}")]
+        public async Task<ActionResult<ResponseTransacaoDTO>> AtualizarStatusPedido(int pedidoId, [FromBody] AtualizarStatusPedidoDTO atualizarDto)
+        {
+            try
+            {
+                var transacao = await _transacaoService.AtualizarStatusPedidoAsync(pedidoId, atualizarDto.StatusPedido);
                 return Ok(transacao);
             }
             catch (ArgumentException ex)

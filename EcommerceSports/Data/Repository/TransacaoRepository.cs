@@ -55,5 +55,22 @@ namespace EcommerceSports.Data.Repository
                 .Where(t => t.Pedido!.ClienteId == clienteId)
                 .ToListAsync();
         }
+
+        public async Task<Transacao?> AtualizarStatusPedidoAsync(int pedidoId, Models.Enums.StatusPedido novoStatus)
+        {
+            var transacao = await _context.Transacoes
+                .Include(t => t.Pedido)
+                .FirstOrDefaultAsync(t => t.PedidoId == pedidoId);
+
+            if (transacao == null || transacao.Pedido == null)
+            {
+                return null;
+            }
+
+            transacao.Pedido.StatusPedido = novoStatus;
+            await _context.SaveChangesAsync();
+
+            return transacao;
+        }
     }
 }
