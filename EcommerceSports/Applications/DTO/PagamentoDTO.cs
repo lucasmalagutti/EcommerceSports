@@ -43,7 +43,7 @@ namespace EcommerceSports.Applications.DTO
         [MinLength(1, ErrorMessage = "Pelo menos um pagamento deve ser informado")]
         public List<CriarPagamentoDTO> Pagamentos { get; set; } = new List<CriarPagamentoDTO>();
 
-        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.EmAberto;
+        public StatusPedido StatusTransacao { get; set; } = StatusPedido.EmProcessamento;
     }
 
     public class ResponseTransacaoComPagamentosDTO
@@ -53,7 +53,7 @@ namespace EcommerceSports.Applications.DTO
         public decimal ValorTotal { get; set; }
         public float ValorFrete { get; set; }
         public int EnderecoId { get; set; }
-        public StatusTransacao StatusTransacao { get; set; }
+        public StatusPedido StatusTransacao { get; set; }
         public DateTime DataTransacao { get; set; }
         public List<PagamentoDTO> Pagamentos { get; set; } = new List<PagamentoDTO>();
         public string Mensagem { get; set; } = string.Empty;

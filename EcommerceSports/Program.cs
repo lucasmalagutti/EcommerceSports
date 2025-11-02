@@ -5,6 +5,7 @@ using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Data.Repository;
 using EcommerceSports.Applications.Services;
 using EcommerceSports.Applications.Services.Interfaces;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddControllers();
 

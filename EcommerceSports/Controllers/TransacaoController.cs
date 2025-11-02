@@ -104,5 +104,28 @@ namespace EcommerceSports.Controllers
                 });
             }
         }
+        [HttpGet("/Transacao/ListarTodos")]
+        public async Task<ActionResult<IEnumerable<ResponseTransacaoDTO>>> ListarTodasTransacoes()
+        {
+            try
+            {
+                var transacoes = await _transacaoService.ListarTodasTransacoes();
+                return Ok(transacoes);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new List<ResponseTransacaoDTO>
+            {
+                new ResponseTransacaoDTO { Mensagem = ex.Message }
+            });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new List<ResponseTransacaoDTO>
+            {
+                new ResponseTransacaoDTO { Mensagem = "Erro interno do servidor: " + ex.Message }
+            });
+            }
+        }
     }
 }

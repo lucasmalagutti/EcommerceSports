@@ -20,7 +20,7 @@ namespace EcommerceSports.Applications.DTO
         public int EnderecoId { get; set; }
 
 
-        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.EmAberto;
+        public StatusPedido StatusTransacao { get; set; } = StatusPedido.EmProcessamento;
     }
 
     public class ResponseTransacaoDTO
@@ -31,7 +31,7 @@ namespace EcommerceSports.Applications.DTO
         public decimal ValorTotal { get; set; }
         public float ValorFrete { get; set; }
         public int EnderecoId { get; set; }
-        public StatusTransacao StatusTransacao { get; set; }
+        public StatusPedido StatusTransacao { get; set; }
         public DateTime DataTransacao { get; set; }
         public string Mensagem { get; set; } = string.Empty;
         public List<ItemPedidoDTO> Itens { get; set; } = new List<ItemPedidoDTO>();

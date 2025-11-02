@@ -1,10 +1,11 @@
+
 namespace EcommerceSports.Models.Enums
 {
     public enum StatusPedido
     {
-        EmProcessamento = 1,
+        EmProcessamento = 3,
         EmTransporte = 2,
-        Entregue = 3,
+        Entregue = 1,
         EmTroca = 4,
         Trocado = 5
     }

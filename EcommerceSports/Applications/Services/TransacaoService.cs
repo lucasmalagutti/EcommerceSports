@@ -68,6 +68,35 @@ namespace EcommerceSports.Applications.Services
             };
         }
 
+        public async Task<IEnumerable<ResponseTransacaoDTO>> ListarTodasTransacoes()
+        {
+            var transacoes = await _transacaoRepository.ListarTodasTransacoes();
+
+            if (!transacoes.Any())
+                throw new ArgumentException("Nenhuma transação encontrada.");
+
+            return transacoes.Select(t => new ResponseTransacaoDTO
+            {
+                Id = t.Id,
+                PedidoId = t.PedidoId,
+                ClienteId = t.Pedido?.ClienteId ?? 0,
+                ValorTotal = t.ValorTotal,
+                ValorFrete = t.ValorFrete,
+                EnderecoId = t.EnderecoId,
+                StatusTransacao = t.StatusTransacao,
+                DataTransacao = t.DataTransacao,
+                Mensagem = "Transação listada com sucesso",
+                Itens = t.Pedido?.Itens.Select(i => new ItemPedidoDTO
+                {
+                    ProdutoId = i.ProdutoId,
+                    NomeProduto = i.Produto.Nome,
+                    Quantidade = i.Quantidade,
+                    PrecoUnitario = i.PrecoUnitario
+                }).ToList() ?? new List<ItemPedidoDTO>()
+            }).ToList();
+
+        }
+
         public async Task<ResponseTransacaoDTO> ObterTransacaoPorIdAsync(int id)
         {
             var transacao = await _transacaoRepository.ObterTransacaoPorIdAsync(id);

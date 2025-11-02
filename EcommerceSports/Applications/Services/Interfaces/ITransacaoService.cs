@@ -9,5 +9,6 @@ namespace EcommerceSports.Applications.Services.Interfaces
         Task<ResponseTransacaoDTO> ObterTransacaoPorIdAsync(int id);
         Task<ResponseTransacaoDTO> ObterTransacaoPorPedidoIdAsync(int pedidoId);
         Task<IEnumerable<ResponseTransacaoDTO>> ObterTransacoesPorCliente(int clienteId);
+        Task<IEnumerable<ResponseTransacaoDTO>> ListarTodasTransacoes();
     }
 }

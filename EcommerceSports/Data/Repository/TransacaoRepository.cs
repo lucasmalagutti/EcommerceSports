@@ -55,5 +55,15 @@ namespace EcommerceSports.Data.Repository
                 .Where(t => t.Pedido!.ClienteId == clienteId)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Transacao>> ListarTodasTransacoes()
+        {
+            return await _context.Transacoes
+             .Include(t => t.Pedido)
+                 .ThenInclude(p => p.Itens)
+                     .ThenInclude(i => i.Produto)
+             .Include(t => t.Endereco)
+             .ToListAsync();
+        }
     }
 }
