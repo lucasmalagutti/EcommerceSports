@@ -39,6 +39,7 @@ namespace EcommerceSports.Applications.DTO
     }
     public class ItemPedidoDTO
     {
+        public int Id { get; set; } // ID do ItemPedido
         public int ProdutoId { get; set; }
         public string NomeProduto { get; set; } = string.Empty;
         public decimal PrecoUnitario { get; set; }

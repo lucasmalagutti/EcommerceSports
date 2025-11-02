@@ -12,17 +12,20 @@ namespace EcommerceSports.Applications.Services
         private readonly ITransacaoRepository _transacaoRepository;
         private readonly IEstoqueService _estoqueService;
         private readonly ICarrinhoService _carrinhoService;
+        private readonly ICupomRepository _cupomRepository;
 
         public PagamentoService(
             IPagamentoRepository pagamentoRepository,
             ITransacaoRepository transacaoRepository,
             IEstoqueService estoqueService,
-            ICarrinhoService carrinhoService)
+            ICarrinhoService carrinhoService,
+            ICupomRepository cupomRepository)
         {
             _pagamentoRepository = pagamentoRepository;
             _transacaoRepository = transacaoRepository;
             _estoqueService = estoqueService;
             _carrinhoService = carrinhoService;
+            _cupomRepository = cupomRepository;
         }
 
         public async Task<ResponseTransacaoComPagamentosDTO> CriarTransacaoComPagamentosAsync(CriarTransacaoComPagamentosDTO criarDto)
@@ -69,6 +72,18 @@ namespace EcommerceSports.Applications.Services
             await _estoqueService.ReduzirEstoquePedidoAsync(criarDto.PedidoId);
 
             await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 6); // Status inicial: AguardandoConfirmacao = 6
+
+            if (criarDto.Cupons != null && criarDto.Cupons.Count > 0)
+            {
+                foreach (var codigoCupom in criarDto.Cupons.Where(c => !string.IsNullOrWhiteSpace(c)))
+                {
+                    var codigoNormalizado = codigoCupom.Trim();
+                    if (codigoNormalizado.ToUpper().Contains("TROCA"))
+                    {
+                        await _cupomRepository.MarcarComoUtilizadoAsync(codigoNormalizado);
+                    }
+                }
+            }
 
 
 

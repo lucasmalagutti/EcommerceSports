@@ -6,7 +6,7 @@ namespace EcommerceSports.Applications.DTO
     {
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
-        public float Desconto { get; set; }
+        public decimal Desconto { get; set; }
     }
 
     public class ValidarCupomDTO
@@ -19,7 +19,7 @@ namespace EcommerceSports.Applications.DTO
     {
         public bool Valido { get; set; }
         public string Nome { get; set; } = string.Empty;
-        public float Desconto { get; set; }
+        public decimal Desconto { get; set; }
         public string Mensagem { get; set; } = string.Empty;
     }
 }
