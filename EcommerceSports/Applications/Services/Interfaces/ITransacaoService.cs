@@ -10,5 +10,6 @@ namespace EcommerceSports.Applications.Services.Interfaces
         Task<ResponseTransacaoDTO> ObterTransacaoPorPedidoIdAsync(int pedidoId);
         Task<IEnumerable<ResponseTransacaoDTO>> ObterTransacoesPorCliente(int clienteId);
         Task<ResponseTransacaoDTO> AtualizarStatusPedidoAsync(int pedidoId, Models.Enums.StatusPedido novoStatus);
+        Task<ResponseTransacaoDTO> AtualizarStatusTransacaoAsync(int transacaoId, Models.Enums.StatusTransacao novoStatus);
     }
 }

@@ -68,7 +68,7 @@ namespace EcommerceSports.Applications.Services
 
             await _estoqueService.ReduzirEstoquePedidoAsync(criarDto.PedidoId);
 
-            await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 2);
+            await _carrinhoService.AtualizarStatusPedidoAsync(criarDto.PedidoId, 6); // Status inicial: AguardandoConfirmacao = 6
 
 
 

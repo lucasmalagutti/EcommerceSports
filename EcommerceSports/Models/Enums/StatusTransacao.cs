@@ -4,7 +4,7 @@ namespace EcommerceSports.Models.Enums
     {
         Aprovado = 1,
         Reprovado = 2,
-        EmAberto = 3,
+        Pendente = 3,
     }
 }
 

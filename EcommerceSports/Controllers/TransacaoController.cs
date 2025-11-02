@@ -106,11 +106,69 @@ namespace EcommerceSports.Controllers
         }
 
         [HttpPut("/Transacao/AtualizarStatus/{pedidoId}")]
-        public async Task<ActionResult<ResponseTransacaoDTO>> AtualizarStatusPedido(int pedidoId, [FromBody] AtualizarStatusPedidoDTO atualizarDto)
+        public async Task<ActionResult<ResponseTransacaoDTO>> AtualizarStatusPedido(int pedidoId, [FromBody] AtualizarStatusPedidoRequest request)
         {
             try
             {
-                var transacao = await _transacaoService.AtualizarStatusPedidoAsync(pedidoId, atualizarDto.StatusPedido);
+                if (request == null || string.IsNullOrWhiteSpace(request.StatusPedido))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = "O campo 'statusPedido' é obrigatório."
+                    });
+                }
+                
+                // Converter string para enum (case-insensitive)
+                if (!Enum.TryParse<Models.Enums.StatusPedido>(request.StatusPedido, true, out var novoStatus))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = $"Status inválido: '{request.StatusPedido}'. Valores aceitos: EmProcessamento, EmTransporte, Entregue, EmTroca, Trocado, AguardandoConfirmacao"
+                    });
+                }
+                
+                var transacao = await _transacaoService.AtualizarStatusPedidoAsync(pedidoId, novoStatus);
+                return Ok(transacao);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new ResponseTransacaoDTO
+                {
+                    Mensagem = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ResponseTransacaoDTO
+                {
+                    Mensagem = "Erro interno do servidor: " + ex.Message
+                });
+            }
+        }
+
+        [HttpPut("/Transacao/AtualizarStatusTransacao/{transacaoId}")]
+        public async Task<ActionResult<ResponseTransacaoDTO>> AtualizarStatusTransacao(int transacaoId, [FromBody] AtualizarStatusTransacaoRequest request)
+        {
+            try
+            {
+                if (request == null || string.IsNullOrWhiteSpace(request.StatusTransacao))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = "O campo 'statusTransacao' é obrigatório."
+                    });
+                }
+                
+                // Converter string para enum (case-insensitive)
+                if (!Enum.TryParse<Models.Enums.StatusTransacao>(request.StatusTransacao, true, out var novoStatus))
+                {
+                    return BadRequest(new ResponseTransacaoDTO
+                    {
+                        Mensagem = $"Status inválido: '{request.StatusTransacao}'. Valores aceitos: Aprovado, Reprovado, Pendente"
+                    });
+                }
+                
+                var transacao = await _transacaoService.AtualizarStatusTransacaoAsync(transacaoId, novoStatus);
                 return Ok(transacao);
             }
             catch (ArgumentException ex)

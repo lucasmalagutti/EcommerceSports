@@ -20,7 +20,7 @@ namespace EcommerceSports.Applications.DTO
         public int EnderecoId { get; set; }
 
 
-        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.EmAberto;
+        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.Pendente;
     }
 
     public class ResponseTransacaoDTO

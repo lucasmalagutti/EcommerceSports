@@ -43,7 +43,7 @@ namespace EcommerceSports.Applications.DTO
         [MinLength(1, ErrorMessage = "Pelo menos um pagamento deve ser informado")]
         public List<CriarPagamentoDTO> Pagamentos { get; set; } = new List<CriarPagamentoDTO>();
 
-        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.EmAberto;
+        public StatusTransacao StatusTransacao { get; set; } = StatusTransacao.Pendente;
     }
 
     public class ResponseTransacaoComPagamentosDTO

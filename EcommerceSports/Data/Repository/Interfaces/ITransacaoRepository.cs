@@ -10,5 +10,6 @@ namespace EcommerceSports.Data.Repository.Interfaces
         Task<bool> ExisteTransacaoParaPedidoAsync(int pedidoId);
         Task<IEnumerable<Transacao>> ObterPorCliente(int clienteId);
         Task<Transacao?> AtualizarStatusPedidoAsync(int pedidoId, Models.Enums.StatusPedido novoStatus);
+        Task<Transacao?> AtualizarStatusTransacaoAsync(int transacaoId, Models.Enums.StatusTransacao novoStatus);
     }
 }

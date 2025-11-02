@@ -72,5 +72,21 @@ namespace EcommerceSports.Data.Repository
 
             return transacao;
         }
+
+        public async Task<Transacao?> AtualizarStatusTransacaoAsync(int transacaoId, Models.Enums.StatusTransacao novoStatus)
+        {
+            var transacao = await _context.Transacoes
+                .FirstOrDefaultAsync(t => t.Id == transacaoId);
+
+            if (transacao == null)
+            {
+                return null;
+            }
+
+            transacao.StatusTransacao = novoStatus;
+            await _context.SaveChangesAsync();
+
+            return transacao;
+        }
     }
 }
