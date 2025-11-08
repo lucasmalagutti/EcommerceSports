@@ -4,6 +4,7 @@ using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
 using EcommerceSports.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using static EcommerceSports.Applications.DTO.GraficoDTO;
 
 namespace EcommerceSports.Applications.Services
 {
@@ -99,7 +100,7 @@ namespace EcommerceSports.Applications.Services
             
             if (transacao == null)
             {
-                throw new ArgumentException("TransaÃ§Ã£o nÃ£o encontrada");
+                throw new ArgumentException("Transação não encontrada");
             }
 
             return new ResponseTransacaoDTO
@@ -113,7 +114,7 @@ namespace EcommerceSports.Applications.Services
                 StatusPedido = transacao.Pedido?.StatusPedido,
                 DataTransacao = transacao.DataTransacao,
                 ClienteId = transacao.Pedido?.ClienteId ?? 0,
-                Mensagem = "TransaÃ§Ã£o encontrada"
+                Mensagem = "Transação encontrada"
             };
         }
 
@@ -123,7 +124,7 @@ namespace EcommerceSports.Applications.Services
             
             if (transacao == null)
             {
-                throw new ArgumentException("TransaÃ§Ã£o nÃ£o encontrada para este pedido");
+                throw new ArgumentException("Transação não encontrada para este pedido");
             }
 
             return new ResponseTransacaoDTO
@@ -137,7 +138,7 @@ namespace EcommerceSports.Applications.Services
                 StatusPedido = transacao.Pedido?.StatusPedido,
                 DataTransacao = transacao.DataTransacao,
                 ClienteId = transacao.Pedido?.ClienteId ?? 0,
-                Mensagem = "TransaÃ§Ã£o encontrada",
+                Mensagem = "Transação encontrada",
                 Itens = transacao.Pedido?.Itens.Select(i => new ItemPedidoDTO
                 {
                     Id = i.Id,
@@ -251,5 +252,49 @@ namespace EcommerceSports.Applications.Services
                 }).ToList() ?? new List<ItemPedidoDTO>()
             };
         }
+        
+        public async Task<List<GraficoVendasDTO>> ObterVolumeVendasPorPeriodo(DateTime dataInicio, DateTime dataFim)
+        {
+            var transacoes = await _transacaoRepository.ObterTransacoesPorPeriodo(dataInicio, dataFim);
+
+            var resultado = transacoes
+                .GroupBy(t => t.DataTransacao.Date)
+                .Select(g => new GraficoVendasDTO
+                {
+                    Data = g.Key,
+                    ValorTotal = g.Sum(t => t.ValorTotal),
+                    QuantidadeVendas = g.Count()
+                })
+                .OrderBy(r => r.Data)
+                .ToList();
+
+            return resultado;
+        }
+
+        public async Task<List<GraficoVendasCategoriaDTO>> ObterVolumeVendasPorCategoria(DateTime dataInicio, DateTime dataFim)
+        {
+            var transacoes = await _transacaoRepository.ObterTransacoesPorPeriodo(dataInicio, dataFim);
+
+            var resultado = transacoes
+                .SelectMany(t => t.Pedido!.Itens.Select(i => new
+                {
+                    Categoria = i.Produto!.Categoria,
+                    t.DataTransacao,
+                    Valor = i.Quantidade * i.PrecoUnitario
+                }))
+                .GroupBy(x => new { x.Categoria, Data = x.DataTransacao.Date })
+                .Select(g => new GraficoVendasCategoriaDTO
+                {
+                    CategoriaNome = g.Key.Categoria,
+                    Data = g.Key.Data,
+                    ValorTotal = g.Sum(x => x.Valor)
+                })
+                .OrderBy(r => r.Data)
+                .ToList();
+
+            return resultado;
+        }
+
+   
     }
 }

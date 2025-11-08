@@ -88,5 +88,24 @@ namespace EcommerceSports.Data.Repository
 
             return transacao;
         }
+        public async Task<IEnumerable<Transacao>> ListarTodasTransacoes()
+        {
+            return await _context.Transacoes
+             .Include(t => t.Pedido)
+                 .ThenInclude(p => p.Itens)
+                     .ThenInclude(i => i.Produto)
+             .Include(t => t.Endereco)
+             .ToListAsync();
+        }
+        public async Task<List<Transacao>> ObterTransacoesPorPeriodo(DateTime dataInicio, DateTime dataFim)
+        {
+            
+            return await _context.Transacoes
+                .Include(t => t.Pedido)
+                    .ThenInclude(p => p.Itens)
+                        .ThenInclude(i => i.Produto)
+                .Where(t => t.DataTransacao >= dataInicio && t.DataTransacao <= dataFim)
+                .ToListAsync(); 
+        }
     }
 }

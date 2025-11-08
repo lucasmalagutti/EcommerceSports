@@ -117,7 +117,7 @@ namespace EcommerceSports.Data.Context
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-                entity.Property(e => e.DataTransacao).HasColumnType("timestamp with time zone");
+                entity.Property(e => e.DataTransacao).HasColumnType("timestamp without time zone");
                 entity.Property(e => e.ValorTotal).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.ValorFrete);
                 entity.HasOne(e => e.Pedido)

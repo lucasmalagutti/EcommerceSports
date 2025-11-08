@@ -186,5 +186,25 @@ namespace EcommerceSports.Controllers
                 });
             }
         }
+
+        [HttpGet("/Transacao/GraficoPorVenda")]
+        public async Task<IActionResult> GetVendasPorPeriodo([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        {
+            if (dataInicio > dataFim)
+                return BadRequest("A data inicial não pode ser maior que a final.");
+
+            var resultado = await _transacaoService.ObterVolumeVendasPorPeriodo(dataInicio, dataFim);
+            return Ok(resultado);
+        }
+
+        [HttpGet("/Transacao/GraficoPorVendaCategoria")]
+        public async Task<IActionResult> GetVendasPorCategoria([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        {
+            if (dataInicio > dataFim)
+                return BadRequest("A data inicial não pode ser maior que a final.");
+
+            var resultado = await _transacaoService.ObterVolumeVendasPorCategoria(dataInicio, dataFim);
+            return Ok(resultado);
+        }
     }
 }

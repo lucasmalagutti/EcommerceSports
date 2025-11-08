@@ -55,7 +55,7 @@ namespace EcommerceSports.Applications.DTO
         public decimal ValorTotal { get; set; }
         public float ValorFrete { get; set; }
         public int EnderecoId { get; set; }
-        public StatusPedido StatusTransacao { get; set; }
+        public StatusTransacao StatusTransacao { get; set; }
         public DateTime DataTransacao { get; set; }
         public List<PagamentoDTO> Pagamentos { get; set; } = new List<PagamentoDTO>();
         public string Mensagem { get; set; } = string.Empty;
