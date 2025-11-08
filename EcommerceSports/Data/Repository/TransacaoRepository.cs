@@ -99,7 +99,9 @@ namespace EcommerceSports.Data.Repository
         }
         public async Task<List<Transacao>> ObterTransacoesPorPeriodo(DateTime dataInicio, DateTime dataFim)
         {
-            
+            dataInicio = DateTime.SpecifyKind(dataInicio, DateTimeKind.Utc);
+            dataFim = DateTime.SpecifyKind(dataFim, DateTimeKind.Utc);
+
             return await _context.Transacoes
                 .Include(t => t.Pedido)
                     .ThenInclude(p => p.Itens)
