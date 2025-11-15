@@ -14,5 +14,13 @@
             public DateTime Data { get; set; }
             public decimal ValorTotal { get; set; }
         }
+
+        public class GraficoVendasProdutoDTO
+        {
+            public string ProdutoNome { get; set; } = string.Empty;
+            public DateTime Data { get; set; }
+            public int Quantidade { get; set; }
+            public decimal ValorTotal { get; set; }
+        }
     }
 }

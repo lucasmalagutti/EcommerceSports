@@ -295,6 +295,33 @@ namespace EcommerceSports.Applications.Services
             return resultado;
         }
 
+        public async Task<List<GraficoVendasProdutoDTO>> ObterVolumeVendasPorProduto(DateTime dataInicio, DateTime dataFim)
+        {
+            var transacoes = await _transacaoRepository.ObterTransacoesPorPeriodo(dataInicio, dataFim);
+
+            var resultado = transacoes
+                .SelectMany(t => t.Pedido!.Itens.Select(i => new
+                {
+                    Produto = i.Produto?.Nome ?? "Produto não informado",
+                    t.DataTransacao,
+                    Quantidade = i.Quantidade,
+                    Valor = i.Quantidade * i.PrecoUnitario
+                }))
+                .GroupBy(x => new { x.Produto, Data = x.DataTransacao.Date })
+                .Select(g => new GraficoVendasProdutoDTO
+                {
+                    ProdutoNome = g.Key.Produto,
+                    Data = g.Key.Data,
+                    Quantidade = g.Sum(x => x.Quantidade),
+                    ValorTotal = g.Sum(x => x.Valor)
+                })
+                .OrderBy(r => r.Data)
+                .ThenBy(r => r.ProdutoNome)
+                .ToList();
+
+            return resultado;
+        }
+
    
     }
 }

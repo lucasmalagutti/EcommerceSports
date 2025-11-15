@@ -206,5 +206,15 @@ namespace EcommerceSports.Controllers
             var resultado = await _transacaoService.ObterVolumeVendasPorCategoria(dataInicio, dataFim);
             return Ok(resultado);
         }
+
+        [HttpGet("/Transacao/GraficoPorVendaProduto")]
+        public async Task<IActionResult> GetVendasPorProduto([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        {
+            if (dataInicio > dataFim)
+                return BadRequest("A data inicial não pode ser maior que a final.");
+
+            var resultado = await _transacaoService.ObterVolumeVendasPorProduto(dataInicio, dataFim);
+            return Ok(resultado);
+        }
     }
 }

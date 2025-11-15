@@ -15,5 +15,6 @@ namespace EcommerceSports.Applications.Services.Interfaces
         Task<ResponseTransacaoDTO> AtualizarStatusTransacaoAsync(int transacaoId, Models.Enums.StatusTransacao novoStatus);
         Task<List<GraficoVendasDTO>> ObterVolumeVendasPorPeriodo(DateTime dataInicio, DateTime dataFim);
         Task<List<GraficoVendasCategoriaDTO>> ObterVolumeVendasPorCategoria(DateTime dataInicio, DateTime dataFim);
+        Task<List<GraficoVendasProdutoDTO>> ObterVolumeVendasPorProduto(DateTime dataInicio, DateTime dataFim);
     }
 }
