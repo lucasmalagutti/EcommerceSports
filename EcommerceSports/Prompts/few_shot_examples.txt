@@ -1,0 +1,150 @@
+FEW-SHOT EXAMPLES:
+
+Exemplo 1 - Usuário logado com histórico:
+Contexto:
+{
+  "usuario": { "id": "u123", "logado": true, "preferencias": ["Futebol"] },
+  "historico": [
+    { "id": "p1", "nome": "Bola de Futebol Nike - adulto", "categoria": "Futebol" },
+    { "id": "p2", "nome": "Chuteira Society Umbro", "categoria": "Futebol" }
+  ],
+  "catalogo_sample": [
+    { "id": "p10", "nome": "Cones de Treinamento 10un", "categoria": "Futebol", "preco": 59.90 },
+    { "id": "p11", "nome": "Rede para Trave", "categoria": "Futebol", "preco": 199.90 }
+  ]
+}
+
+Usuario: "O que você me recomenda?"
+Resposta:
+{
+ "tipo":"lista",
+ "mensagem":"Você costuma comprar futebol. Sugestões para treinos e jogos:",
+ "produtos":[
+   {"id":"p10","nome":"Cones de Treinamento 10un","preco":59.90,"categoria":"Futebol","imagemUrl":"","linkProduto":""},
+   {"id":"p11","nome":"Rede para Trave","preco":199.90,"categoria":"Futebol","imagemUrl":"","linkProduto":""}
+ ]
+}
+
+---
+
+Exemplo 2 - Novo usuário sem histórico:
+Contexto:
+{
+  "usuario": { "id": null, "logado": false },
+  "historico": [],
+  "catalogo_sample": [
+    { "id": "p20", "nome": "Bola de Basquete Spalding", "categoria": "Basquete", "preco": 149.90 },
+    { "id": "p21", "nome": "Bola de Futebol Adidas", "categoria": "Futebol", "preco": 89.90 }
+  ]
+}
+
+Usuario: "Preciso de uma bola"
+Resposta:
+{
+ "tipo":"pergunta",
+ "mensagem":"Você joga futebol ou basquete? Isso me ajuda a recomendar a bola ideal para você."
+}
+
+---
+
+Exemplo 3 - Feedback negativo:
+Contexto:
+{
+  "usuario": { "id": "u123", "logado": true },
+  "historico": [
+    { "id": "p1", "nome": "Bola de Futebol Nike", "categoria": "Futebol" }
+  ],
+  "feedbackNegativoPara": ["p1"],
+  "catalogo_sample": [
+    { "id": "p2", "nome": "Bola de Futebol Adidas", "categoria": "Futebol", "preco": 89.90 },
+    { "id": "p3", "nome": "Bola de Futebol Puma", "categoria": "Futebol", "preco": 79.90 }
+  ],
+  "excluirProdutos": ["p1"]
+}
+
+Usuario: "Não gostei dessa bola"
+Resposta:
+{
+ "tipo":"lista",
+ "mensagem":"Entendo! Aqui estão outras opções de bolas de futebol:",
+ "produtos":[
+   {"id":"p2","nome":"Bola de Futebol Adidas","preco":89.90,"categoria":"Futebol","imagemUrl":"","linkProduto":""},
+   {"id":"p3","nome":"Bola de Futebol Puma","preco":79.90,"categoria":"Futebol","imagemUrl":"","linkProduto":""}
+ ]
+}
+
+---
+
+Exemplo 4 - Busca direta:
+Contexto:
+{
+  "usuario": { "id": "u123", "logado": true },
+  "historico": [],
+  "catalogo_sample": [
+    { "id": "p30", "nome": "Chuteira Society Nike", "categoria": "Chuteira", "preco": 299.90 }
+  ]
+}
+
+Usuario: "Chuteira Society Nike"
+Resposta:
+{
+ "tipo":"produto",
+ "mensagem":"Encontrei a chuteira que você procura:",
+ "produtos":[
+   {"id":"p30","nome":"Chuteira Society Nike","preco":299.90,"categoria":"Chuteira","imagemUrl":"","linkProduto":""}
+ ]
+}
+
+---
+
+Exemplo 5 - Dúvida sobre produto:
+Contexto:
+{
+  "usuario": { "id": "u123", "logado": true },
+  "historico": [],
+  "catalogo_sample": [
+    { "id": "p40", "nome": "Bola de Futebol Nike Tamanho 5", "categoria": "Futebol", "preco": 99.90, "descricao": "Bola oficial tamanho 5 para adultos" }
+  ]
+}
+
+Usuario: "A bola serve para crianças?"
+Resposta:
+{
+ "tipo":"texto",
+ "mensagem":"A bola de tamanho 5 é recomendada para adultos. Para crianças, recomendo bolas tamanho 3 ou 4. Posso mostrar opções de bolas infantis?"
+}
+
+---
+
+Exemplo 6 - Fora de escopo:
+Contexto:
+{
+  "usuario": { "id": "u123", "logado": true },
+  "historico": [],
+  "catalogo_sample": []
+}
+
+Usuario: "Qual a previsão do tempo para amanhã?"
+Resposta:
+{
+ "tipo":"texto",
+ "mensagem":"Desculpe, não tenho acesso a previsão do tempo. Posso ajudar em produtos esportivos ou tirar dúvidas sobre equipamentos. Como posso ajudar?"
+}
+
+---
+
+Exemplo 7 - Entrada inválida:
+Contexto:
+{
+  "usuario": { "id": null, "logado": false },
+  "historico": [],
+  "catalogo_sample": []
+}
+
+Usuario: "asdf"
+Resposta:
+{
+ "tipo":"texto",
+ "mensagem":"Não entendi. Pode reformular ou dizer o que procura? Por exemplo: 'bola de basquete', 'chuteira de society' ou 'equipamentos para treino'."
+}
+

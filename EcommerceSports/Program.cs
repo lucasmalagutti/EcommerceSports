@@ -40,6 +40,7 @@ builder.Services.AddScoped<IPagamentoService, PagamentoService>();
 builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
 builder.Services.AddScoped<ISolicitacaoTrocaService, SolicitacaoTrocaService>();
 builder.Services.AddScoped<ISolicitacaoTrocaRepository, SolicitacaoTrocaRepository>();
+builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 
 builder.Services.AddCors(options =>
 {

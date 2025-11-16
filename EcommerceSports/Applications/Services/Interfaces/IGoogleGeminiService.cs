@@ -4,7 +4,7 @@ namespace EcommerceSports.Applications.Services.Interfaces
 {
     public interface IGoogleGeminiService
     {
-        Task<string> GerarConteudo(string prompt);
+        Task<string> GerarConteudo(string prompt, object? contexto = null);
     }
 }
 
