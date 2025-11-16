@@ -1,13 +1,17 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EcommerceSports.Applications.DTO;
 using EcommerceSports.Applications.Services.Interfaces;
 using EcommerceSports.Data.Repository.Interfaces;
+using EcommerceSports.Models.Entity;
 using Microsoft.Extensions.Logging;
 
 namespace EcommerceSports.Applications.Services
@@ -19,6 +23,24 @@ namespace EcommerceSports.Applications.Services
         private readonly IGoogleGeminiService _geminiService;
         private readonly ILogger<ChatbotService>? _logger;
         private readonly IConfiguration _configuration;
+
+        private static readonly Regex PalavraChaveRegex = new(@"[0-9A-Za-zÀ-ÿ]+(?:[.,][0-9]+)?", RegexOptions.Compiled);
+        private static readonly HashSet<string> StopWords = new(
+            new[]
+            {
+                "de", "da", "do", "das", "dos", "para", "pra", "por", "com", "sem", "uma", "um", "uns", "umas",
+                "o", "a", "os", "as", "no", "na", "nos", "nas", "em", "ao", "à", "às", "e", "ou", "que", "qual",
+                "quais", "ser", "estar", "ter", "tem", "tenho", "quero", "gostaria", "preciso", "procurando",
+                "me", "você", "vocês", "ajudar", "ajuda", "pode", "poderia", "favor"
+            },
+            StringComparer.OrdinalIgnoreCase);
+        private static readonly CultureInfo CulturaPtBr = CultureInfo.GetCultureInfo("pt-BR");
+        private static readonly string[] GatihosRecomendacao = new[]
+        {
+            "recomenda", "recomendar", "recomendaria", "recomende", "sugira", "me sugere", "sugere", "sugerir", "indica", "indicar",
+            "o que você me recomenda", "alguma sugestão", "qual recomendação", "me indica"
+        };
+        private static readonly ConcurrentDictionary<int, RecomendacaoMemoria> ContextoRecomendacoes = new();
 
         public ChatbotService(
             IProdutoRepository produtoRepository,
@@ -49,15 +71,40 @@ namespace EcommerceSports.Applications.Services
             // Detectar feedback negativo
             var feedbackNegativo = DetectarFeedbackNegativo(mensagemUsuario);
             var produtosExcluir = new List<string>();
+            var usuarioContexto = usuarioId ?? 33;
+
+            if (feedbackNegativo)
+            {
+                var respostaFeedback = await TentarResponderFeedbackNegativo(usuarioContexto, mensagemUsuario);
+                if (respostaFeedback != null)
+                {
+                    return respostaFeedback;
+                }
+            }
 
             // Montar contexto
-            var contexto = await MontarContexto(usuarioId, feedbackNegativo, produtosExcluir);
+            var contexto = await MontarContexto(usuarioId ?? usuarioContexto, feedbackNegativo, produtosExcluir);
 
             // Caso 4: Busca direta por produto
             var buscaDireta = await TentarBuscaDireta(mensagemUsuario);
             if (buscaDireta != null)
             {
                 return buscaDireta;
+            }
+
+            var recomendacaoHistorico = await TentarRecomendacaoPersonalizada(mensagemUsuario, usuarioContexto);
+            if (recomendacaoHistorico != null)
+            {
+                return recomendacaoHistorico;
+            }
+
+            if (!feedbackNegativo)
+            {
+                var respostaPalavrasChave = await TentarRespostaComPalavrasChave(mensagemUsuario);
+                if (respostaPalavrasChave != null)
+                {
+                    return respostaPalavrasChave;
+                }
             }
 
             // Caso 6: Detectar perguntas fora de escopo
@@ -81,7 +128,7 @@ namespace EcommerceSports.Applications.Services
                 respostaBruta?.Length ?? 0, respostaBruta?.Substring(0, Math.Min(500, respostaBruta?.Length ?? 0)) ?? "vazio");
 
             // Interpretar resposta
-            var resposta = InterpretarResposta(respostaBruta);
+            var resposta = InterpretarResposta(respostaBruta ?? string.Empty);
             
             // Se a resposta ainda estiver vazia ou inválida, tentar fallback baseado na mensagem
             if (string.IsNullOrWhiteSpace(resposta.Mensagem) || resposta.Mensagem == "Desculpe, não entendi. Pode ser mais específico?")
@@ -307,6 +354,89 @@ namespace EcommerceSports.Applications.Services
             }
         }
 
+        private async Task<ChatbotRespostaDTO?> TentarRespostaComPalavrasChave(string mensagemUsuario)
+        {
+            var termos = ExtrairPalavrasChave(mensagemUsuario);
+            if (!termos.Any())
+            {
+                return null;
+            }
+
+            try
+            {
+                var produtos = await _produtoRepository.BuscarProdutosPorFiltro(null, termos);
+                var produtosLista = produtos
+                    .GroupBy(p => p.Id)
+                    .Select(g => g.First())
+                    .Take(8)
+                    .Select(p => new ProdutoDTO
+                    {
+                        Id = p.Id.ToString(),
+                        Nome = p.Nome,
+                        Preco = (decimal)p.Preco,
+                        Categoria = p.Categoria,
+                        ImagemUrl = p.Imagem ?? string.Empty,
+                        LinkProduto = $"/produto/{p.Id}"
+                    })
+                    .ToList();
+
+                if (produtosLista.Any())
+                {
+                    return new ChatbotRespostaDTO
+                    {
+                        Tipo = "lista",
+                        Mensagem = "Encontrei algumas opções que combinam com o que você descreveu:",
+                        Produtos = produtosLista
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao buscar produtos por palavras-chave para a mensagem: {Mensagem}", mensagemUsuario);
+            }
+
+            return null;
+        }
+
+        private static List<string> ExtrairPalavrasChave(string mensagem)
+        {
+            if (string.IsNullOrWhiteSpace(mensagem))
+            {
+                return new List<string>();
+            }
+
+            var termos = new List<string>();
+
+            foreach (Match match in PalavraChaveRegex.Matches(mensagem))
+            {
+                var token = match.Value.Trim();
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    continue;
+                }
+
+                if (StopWords.Contains(token))
+                {
+                    continue;
+                }
+
+                var ehNumero = decimal.TryParse(token, NumberStyles.Number, CultureInfo.InvariantCulture, out _) ||
+                               decimal.TryParse(token, NumberStyles.Number, CulturaPtBr, out _);
+
+                if (!ehNumero && token.Length <= 2)
+                {
+                    continue;
+                }
+
+                termos.Add(token);
+            }
+
+            return termos
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(10)
+                .ToList();
+        }
+
         private string ExtrairPrimeiroJson(string texto)
         {
             if (string.IsNullOrWhiteSpace(texto))
@@ -493,6 +623,306 @@ namespace EcommerceSports.Applications.Services
             }
 
             return null;
+        }
+
+        private async Task<ChatbotRespostaDTO?> TentarRecomendacaoPersonalizada(string mensagemUsuario, int usuarioId)
+        {
+            if (!ContemGatilhoRecomendacao(mensagemUsuario))
+            {
+                return null;
+            }
+
+            try
+            {
+                var historico = await _pedidoRepository.ObterHistoricoComprasPorCliente(usuarioId, 30);
+                var itensHistorico = historico.Where(ip => ip.Produto != null).ToList();
+
+                if (!itensHistorico.Any())
+                {
+                    return null;
+                }
+
+                var categoriasOrdenadas = itensHistorico
+                    .Where(ip => !string.IsNullOrWhiteSpace(ip.Produto!.Categoria))
+                    .GroupBy(ip => ip.Produto!.Categoria)
+                    .OrderByDescending(g => g.Sum(ip => ip.Quantidade))
+                    .Select(g => g.Key!)
+                    .ToList();
+
+                if (!categoriasOrdenadas.Any())
+                {
+                    return null;
+                }
+
+                var produtosCatalogo = await _produtoRepository.ListarTodos();
+                var idsJaComprados = itensHistorico.Select(ip => ip.Produto!.Id).ToHashSet();
+
+                var recomendados = new List<Produto>();
+                foreach (var categoria in categoriasOrdenadas)
+                {
+                    var produtosCategoria = produtosCatalogo
+                        .Where(p => categoria.Equals(p.Categoria, StringComparison.OrdinalIgnoreCase) && !idsJaComprados.Contains(p.Id))
+                        .Take(3)
+                        .ToList();
+
+                    recomendados.AddRange(produtosCategoria);
+
+                    if (recomendados.Count >= 5)
+                    {
+                        break;
+                    }
+                }
+
+                if (!recomendados.Any())
+                {
+                    var categoriaPrincipal = categoriasOrdenadas.First();
+                    recomendados = produtosCatalogo
+                        .Where(p => categoriaPrincipal.Equals(p.Categoria, StringComparison.OrdinalIgnoreCase))
+                        .Take(5)
+                        .ToList();
+                }
+
+                if (!recomendados.Any())
+                {
+                    return null;
+                }
+
+                recomendados = recomendados
+                    .GroupBy(p => p.Id)
+                    .Select(g => g.First())
+                    .Take(5)
+                    .ToList();
+
+                var produtoDestaque = itensHistorico
+                    .OrderByDescending(ip => ip.Quantidade)
+                    .Select(ip => ip.Produto!.Nome)
+                    .FirstOrDefault();
+
+                var categoriaDestaque = categoriasOrdenadas.First();
+                var mensagem = produtoDestaque != null
+                    ? $"Notei que você gostou de {produtoDestaque}. Que tal conferir também esta opção da linha de {categoriaDestaque}?"
+                    : $"Notei que você curte {categoriaDestaque}. Veja se essa sugestão faz sentido para você:";
+
+                return CriarRespostaRecomendacao(usuarioId, recomendados, categoriaDestaque, produtoDestaque, mensagem);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro ao gerar recomendação personalizada para o usuário {UsuarioId}", usuarioId);
+                return null;
+            }
+        }
+
+        private ChatbotRespostaDTO CriarRespostaRecomendacao(int usuarioId, List<Produto> candidatos, string categoriaReferencia, string? nomeReferencia, string mensagemBase)
+        {
+            var candidatosDistintos = candidatos
+                .Where(p => p != null)
+                .GroupBy(p => p.Id)
+                .Select(g => g.First())
+                .ToList();
+
+            if (!candidatosDistintos.Any())
+            {
+                ContextoRecomendacoes.TryRemove(usuarioId, out _);
+                return new ChatbotRespostaDTO
+                {
+                    Tipo = "texto",
+                    Mensagem = "Ainda não encontrei uma boa sugestão agora, que tal tentar outro tipo de produto?"
+                };
+            }
+
+            var principal = candidatosDistintos.First();
+            var sugestaoPrincipal = ConverterProdutoParaSugestao(principal);
+
+            var memoria = new RecomendacaoMemoria
+            {
+                Categoria = categoriaReferencia,
+                NomeReferencia = nomeReferencia ?? principal.Nome,
+                UltimaSugestao = sugestaoPrincipal
+            };
+
+            memoria.Rejeitados.Add(sugestaoPrincipal.Id);
+            foreach (var restante in candidatosDistintos.Skip(1))
+            {
+                var mesmoNome = !string.IsNullOrWhiteSpace(nomeReferencia) &&
+                                restante.Nome.Contains(nomeReferencia, StringComparison.OrdinalIgnoreCase);
+                var mesmaCategoria = !string.IsNullOrWhiteSpace(categoriaReferencia) &&
+                                     categoriaReferencia.Equals(restante.Categoria, StringComparison.OrdinalIgnoreCase);
+
+                if (!mesmoNome && !mesmaCategoria)
+                {
+                    continue;
+                }
+
+                memoria.Alternativas.Enqueue(ConverterProdutoParaSugestao(restante));
+            }
+
+            ContextoRecomendacoes.AddOrUpdate(usuarioId, memoria, (_, __) => memoria);
+
+            var mensagem = string.IsNullOrWhiteSpace(mensagemBase)
+                ? $"Minha sugestão é {sugestaoPrincipal.Nome}. Que acha?"
+                : $"{mensagemBase} Minha sugestão é {sugestaoPrincipal.Nome}.";
+
+            return new ChatbotRespostaDTO
+            {
+                Tipo = "lista",
+                Mensagem = mensagem,
+                Produtos = new List<ProdutoDTO> { ConverterSugestaoParaDto(sugestaoPrincipal) }
+            };
+        }
+
+        private static ProdutoSugestao ConverterProdutoParaSugestao(Produto produto)
+        {
+            return new ProdutoSugestao
+            {
+                Id = produto.Id,
+                Nome = produto.Nome,
+                Categoria = produto.Categoria,
+                Preco = (decimal)produto.Preco,
+                Imagem = produto.Imagem
+            };
+        }
+
+        private static ProdutoDTO ConverterSugestaoParaDto(ProdutoSugestao sugestao)
+        {
+            return new ProdutoDTO
+            {
+                Id = sugestao.Id.ToString(),
+                Nome = sugestao.Nome,
+                Preco = sugestao.Preco,
+                Categoria = sugestao.Categoria,
+                ImagemUrl = sugestao.Imagem ?? string.Empty,
+                LinkProduto = $"/produto/{sugestao.Id}"
+            };
+        }
+
+        private static string FormatarListaProdutos(IReadOnlyList<string> nomes)
+        {
+            if (nomes.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            if (nomes.Count == 1)
+            {
+                return nomes[0];
+            }
+
+            var prefixo = string.Join(", ", nomes.Take(nomes.Count - 1));
+            return $"{prefixo} ou {nomes.Last()}";
+        }
+
+        private async Task<ChatbotRespostaDTO?> TentarResponderFeedbackNegativo(int usuarioId, string mensagemUsuario)
+        {
+            if (!ContextoRecomendacoes.TryGetValue(usuarioId, out var memoria))
+            {
+                return null;
+            }
+
+            _logger?.LogInformation("Feedback negativo do usuário {UsuarioId}: {Mensagem}", usuarioId, mensagemUsuario);
+
+            var alternativasSelecionadas = new List<ProdutoSugestao>();
+
+            ProdutoSugestao? ObterProximaAlternativa()
+            {
+                while (memoria.Alternativas.Count > 0)
+                {
+                    var candidato = memoria.Alternativas.Dequeue();
+                    if (memoria.Rejeitados.Contains(candidato.Id))
+                    {
+                        continue;
+                    }
+
+                    memoria.Rejeitados.Add(candidato.Id);
+                    return candidato;
+                }
+
+                return null;
+            }
+
+            var proxima = ObterProximaAlternativa();
+
+            if (proxima == null)
+            {
+                var produtos = await _produtoRepository.ListarTodos();
+                var novosCandidatos = produtos
+                    .Where(p =>
+                        (!string.IsNullOrWhiteSpace(memoria.NomeReferencia) && p.Nome.Contains(memoria.NomeReferencia, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrWhiteSpace(memoria.Categoria) && memoria.Categoria.Equals(p.Categoria, StringComparison.OrdinalIgnoreCase)))
+                    .Where(p => !memoria.Rejeitados.Contains(p.Id))
+                    .Take(5)
+                    .Select(ConverterProdutoParaSugestao)
+                    .ToList();
+
+                foreach (var candidato in novosCandidatos)
+                {
+                    memoria.Alternativas.Enqueue(candidato);
+                }
+
+                proxima = ObterProximaAlternativa();
+            }
+
+            if (proxima != null)
+            {
+                alternativasSelecionadas.Add(proxima);
+                memoria.UltimaSugestao = proxima;
+            }
+
+            var segunda = ObterProximaAlternativa();
+            if (segunda != null)
+            {
+                alternativasSelecionadas.Add(segunda);
+            }
+
+            if (!alternativasSelecionadas.Any())
+            {
+                ContextoRecomendacoes.TryRemove(usuarioId, out _);
+                return null;
+            }
+
+            var nomes = alternativasSelecionadas.Select(a => a.Nome).ToList();
+            var mensagem = $"Entendido. Que tal experimentar {FormatarListaProdutos(nomes)}?";
+
+            var produtosDto = alternativasSelecionadas
+                .Select(ConverterSugestaoParaDto)
+                .ToList();
+
+            memoria.UltimaSugestao = alternativasSelecionadas.Last();
+
+            return new ChatbotRespostaDTO
+            {
+                Tipo = "lista",
+                Mensagem = mensagem,
+                Produtos = produtosDto
+            };
+        }
+
+        private static bool ContemGatilhoRecomendacao(string mensagem)
+        {
+            if (string.IsNullOrWhiteSpace(mensagem))
+            {
+                return false;
+            }
+
+            var mensagemLower = mensagem.ToLowerInvariant();
+            return GatihosRecomendacao.Any(gatilho => mensagemLower.Contains(gatilho));
+        }
+
+        private class RecomendacaoMemoria
+        {
+            public string? Categoria { get; set; }
+            public string? NomeReferencia { get; set; }
+            public Queue<ProdutoSugestao> Alternativas { get; } = new();
+            public HashSet<int> Rejeitados { get; } = new();
+            public ProdutoSugestao? UltimaSugestao { get; set; }
+        }
+
+        private class ProdutoSugestao
+        {
+            public int Id { get; set; }
+            public string Nome { get; set; } = string.Empty;
+            public string Categoria { get; set; } = string.Empty;
+            public decimal Preco { get; set; }
+            public string? Imagem { get; set; }
         }
 
         private bool DetectarForaDeEscopo(string mensagem)

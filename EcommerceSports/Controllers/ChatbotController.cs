@@ -43,6 +43,12 @@ namespace EcommerceSports.Controllers
                     }
                 }
 
+                // Regra de fallback: se nada veio, utilizar usuário padrão (id 33)
+                if (!usuarioId.HasValue)
+                {
+                    usuarioId = 33;
+                }
+
                 var resposta = await _chatbotService.ProcessarMensagem(requisicao.MensagemUsuario ?? "", usuarioId);
                 
                 // Garantir que a resposta nunca seja nula

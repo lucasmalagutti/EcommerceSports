@@ -2,8 +2,10 @@
 using EcommerceSports.Data.Repository.Interfaces;
 using EcommerceSports.Models.Entity;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 
 namespace EcommerceSports.Data.Repository
 {
@@ -24,20 +26,44 @@ namespace EcommerceSports.Data.Repository
         {
             var query = _context.Produtos.AsQueryable();
 
-            if (!string.IsNullOrEmpty(categoria))
+            if (!string.IsNullOrWhiteSpace(categoria))
             {
-                query = query.Where(p => EF.Functions.ILike(p.Categoria, $"%{categoria}%"));
+                var categoriaTermo = categoria.Trim();
+                query = query.Where(p => EF.Functions.ILike(p.Categoria, $"%{categoriaTermo}%"));
             }
 
             if (termosDeBusca != null && termosDeBusca.Any())
             {
-                foreach (var termo in termosDeBusca)
+                var termosValidos = termosDeBusca
+                    .Where(t => !string.IsNullOrWhiteSpace(t))
+                    .Select(t => t.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (!termosValidos.Any())
+                {
+                    return new List<Produto>();
+                }
+
+                foreach (var termo in termosValidos)
                 {
                     var pattern = $"%{termo}%";
+                    decimal valorNumerico = 0m;
+                    bool termoEhNumero =
+                        decimal.TryParse(termo, NumberStyles.Number, CultureInfo.InvariantCulture, out valorNumerico) ||
+                        decimal.TryParse(termo, NumberStyles.Number, new CultureInfo("pt-BR"), out valorNumerico);
+
+                    var margemPreco = 0.01m;
                     query = query.Where(p =>
                         EF.Functions.ILike(p.Nome, pattern) ||
-                        EF.Functions.ILike(p.Descricao ?? string.Empty, pattern));
+                        EF.Functions.ILike(p.Descricao ?? string.Empty, pattern) ||
+                        EF.Functions.ILike(p.Categoria, pattern) ||
+                        (termoEhNumero && (decimal)p.Preco >= valorNumerico - margemPreco && (decimal)p.Preco <= valorNumerico + margemPreco));
                 }
+            }
+            else
+            {
+                return new List<Produto>();
             }
 
             return await query.ToListAsync();
