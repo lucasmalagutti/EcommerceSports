@@ -86,7 +86,7 @@ namespace EcommerceSports.Applications.Services
             var contexto = await MontarContexto(usuarioId ?? usuarioContexto, feedbackNegativo, produtosExcluir);
 
             // Caso 4: Busca direta por produto
-            var buscaDireta = await TentarBuscaDireta(mensagemUsuario);
+            var buscaDireta = await TentarBuscaDireta(mensagemUsuario, usuarioContexto);
             if (buscaDireta != null)
             {
                 return buscaDireta;
@@ -100,7 +100,7 @@ namespace EcommerceSports.Applications.Services
 
             if (!feedbackNegativo)
             {
-                var respostaPalavrasChave = await TentarRespostaComPalavrasChave(mensagemUsuario);
+            var respostaPalavrasChave = await TentarRespostaComPalavrasChave(mensagemUsuario, usuarioContexto);
                 if (respostaPalavrasChave != null)
                 {
                     return respostaPalavrasChave;
@@ -133,7 +133,7 @@ namespace EcommerceSports.Applications.Services
             // Se a resposta ainda estiver vazia ou inválida, tentar fallback baseado na mensagem
             if (string.IsNullOrWhiteSpace(resposta.Mensagem) || resposta.Mensagem == "Desculpe, não entendi. Pode ser mais específico?")
             {
-                resposta = await GerarRespostaFallback(mensagemUsuario, contexto);
+                resposta = await GerarRespostaFallback(mensagemUsuario, contexto, usuarioContexto);
             }
             
             _logger?.LogInformation("Resposta interpretada. Tipo: {Tipo}, Mensagem: {Mensagem}, Produtos: {Count}", 
@@ -142,7 +142,11 @@ namespace EcommerceSports.Applications.Services
             // Normalizar produtos (buscar dados canônicos do banco)
             if (resposta.Produtos != null && resposta.Produtos.Any())
             {
-                resposta.Produtos = await NormalizarProdutos(resposta.Produtos);
+                resposta.Produtos = await NormalizarProdutos(resposta.Produtos, usuarioContexto);
+                if (string.IsNullOrWhiteSpace(resposta.Layout) || resposta.Layout == "texto")
+                {
+                    resposta.Layout = "cards";
+                }
             }
 
             // Log de métricas
@@ -354,7 +358,7 @@ namespace EcommerceSports.Applications.Services
             }
         }
 
-        private async Task<ChatbotRespostaDTO?> TentarRespostaComPalavrasChave(string mensagemUsuario)
+        private async Task<ChatbotRespostaDTO?> TentarRespostaComPalavrasChave(string mensagemUsuario, int usuarioId)
         {
             var termos = ExtrairPalavrasChave(mensagemUsuario);
             if (!termos.Any())
@@ -369,15 +373,7 @@ namespace EcommerceSports.Applications.Services
                     .GroupBy(p => p.Id)
                     .Select(g => g.First())
                     .Take(8)
-                    .Select(p => new ProdutoDTO
-                    {
-                        Id = p.Id.ToString(),
-                        Nome = p.Nome,
-                        Preco = (decimal)p.Preco,
-                        Categoria = p.Categoria,
-                        ImagemUrl = p.Imagem ?? string.Empty,
-                        LinkProduto = $"/produto/{p.Id}"
-                    })
+                    .Select(p => CriarProdutoDto(p, usuarioId))
                     .ToList();
 
                 if (produtosLista.Any())
@@ -385,6 +381,7 @@ namespace EcommerceSports.Applications.Services
                     return new ChatbotRespostaDTO
                     {
                         Tipo = "lista",
+                        Layout = "cards",
                         Mensagem = "Encontrei algumas opções que combinam com o que você descreveu:",
                         Produtos = produtosLista
                     };
@@ -506,45 +503,44 @@ namespace EcommerceSports.Applications.Services
             return "{}";
         }
 
-        private async Task<List<ProdutoDTO>> NormalizarProdutos(List<ProdutoDTO> produtos)
+        private async Task<List<ProdutoDTO>> NormalizarProdutos(List<ProdutoDTO> produtos, int usuarioId)
         {
             var produtosNormalizados = new List<ProdutoDTO>();
+            List<Produto>? catalogo = null;
 
             foreach (var produto in produtos)
             {
-                if (int.TryParse(produto.Id, out var produtoId))
+                if (!int.TryParse(produto.Id, out var produtoId))
                 {
-                    try
-                    {
-                        var todosProdutos = await _produtoRepository.ListarTodos();
-                        var produtoDb = todosProdutos.FirstOrDefault(p => p.Id == produtoId);
+                    produtosNormalizados.Add(produto);
+                    continue;
+                }
 
-                        if (produtoDb != null)
-                        {
-                            produtosNormalizados.Add(new ProdutoDTO
-                            {
-                                Id = produtoDb.Id.ToString(),
-                                Nome = produtoDb.Nome,
-                                Preco = (decimal)produtoDb.Preco,
-                                Categoria = produtoDb.Categoria,
-                                ImagemUrl = produtoDb.Imagem ?? "",
-                                LinkProduto = $"/produto/{produtoDb.Id}" // Ajustar conforme sua rota
-                            });
-                        }
-                        else
-                        {
-                            // Manter produto original se não encontrar no DB
-                            produtosNormalizados.Add(produto);
-                        }
-                    }
-                    catch (Exception ex)
+                try
+                {
+                    catalogo ??= await _produtoRepository.ListarTodos();
+                    var produtoDb = catalogo.FirstOrDefault(p => p.Id == produtoId);
+
+                    if (produtoDb != null)
                     {
-                        _logger?.LogWarning(ex, "Erro ao normalizar produto {ProdutoId}", produtoId);
+                        produtosNormalizados.Add(CriarProdutoDto(produtoDb, usuarioId));
+                    }
+                    else
+                    {
+                        if (produto.Preco.HasValue && produto.Acao == null)
+                        {
+                            produto.Acao = CriarAcaoAdicionarCarrinho(usuarioId, produtoId, produto.Preco.Value, produto.Nome);
+                        }
                         produtosNormalizados.Add(produto);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
+                    _logger?.LogWarning(ex, "Erro ao normalizar produto {ProdutoId}", produtoId);
+                    if (produto.Preco.HasValue && produto.Acao == null)
+                    {
+                        produto.Acao = CriarAcaoAdicionarCarrinho(usuarioId, produtoId, produto.Preco.Value, produto.Nome);
+                    }
                     produtosNormalizados.Add(produto);
                 }
             }
@@ -559,7 +555,7 @@ namespace EcommerceSports.Applications.Services
             return termosNegativos.Any(termo => mensagemLower.Contains(termo));
         }
 
-        private async Task<ChatbotRespostaDTO?> TentarBuscaDireta(string mensagem)
+        private async Task<ChatbotRespostaDTO?> TentarBuscaDireta(string mensagem, int usuarioId)
         {
             try
             {
@@ -573,18 +569,11 @@ namespace EcommerceSports.Applications.Services
                     return new ChatbotRespostaDTO
                     {
                         Tipo = "produto",
+                        Layout = "cards",
                         Mensagem = "Encontrei o produto que você procura:",
                         Produtos = new List<ProdutoDTO>
                         {
-                            new ProdutoDTO
-                            {
-                                Id = produtoEncontrado.Id.ToString(),
-                                Nome = produtoEncontrado.Nome,
-                                Preco = (decimal)produtoEncontrado.Preco,
-                                Categoria = produtoEncontrado.Categoria,
-                                ImagemUrl = produtoEncontrado.Imagem ?? "",
-                                LinkProduto = $"/produto/{produtoEncontrado.Id}"
-                            }
+                            CriarProdutoDto(produtoEncontrado, usuarioId)
                         }
                     };
                 }
@@ -601,18 +590,11 @@ namespace EcommerceSports.Applications.Services
                     return new ChatbotRespostaDTO
                     {
                         Tipo = "produto",
+                        Layout = "cards",
                         Mensagem = "Encontrei um produto similar:",
                         Produtos = new List<ProdutoDTO>
                         {
-                            new ProdutoDTO
-                            {
-                                Id = produto.Id.ToString(),
-                                Nome = produto.Nome,
-                                Preco = (decimal)produto.Preco,
-                                Categoria = produto.Categoria,
-                                ImagemUrl = produto.Imagem ?? "",
-                                LinkProduto = $"/produto/{produto.Id}"
-                            }
+                            CriarProdutoDto(produto, usuarioId)
                         }
                     };
                 }
@@ -765,8 +747,9 @@ namespace EcommerceSports.Applications.Services
             return new ChatbotRespostaDTO
             {
                 Tipo = "lista",
+                Layout = "cards",
                 Mensagem = mensagem,
-                Produtos = new List<ProdutoDTO> { ConverterSugestaoParaDto(sugestaoPrincipal) }
+                Produtos = new List<ProdutoDTO> { ConverterSugestaoParaDto(sugestaoPrincipal, usuarioId) }
             };
         }
 
@@ -778,21 +761,14 @@ namespace EcommerceSports.Applications.Services
                 Nome = produto.Nome,
                 Categoria = produto.Categoria,
                 Preco = (decimal)produto.Preco,
-                Imagem = produto.Imagem
+                Imagem = produto.Imagem,
+                Descricao = produto.Descricao
             };
         }
 
-        private static ProdutoDTO ConverterSugestaoParaDto(ProdutoSugestao sugestao)
+        private ProdutoDTO ConverterSugestaoParaDto(ProdutoSugestao sugestao, int usuarioId)
         {
-            return new ProdutoDTO
-            {
-                Id = sugestao.Id.ToString(),
-                Nome = sugestao.Nome,
-                Preco = sugestao.Preco,
-                Categoria = sugestao.Categoria,
-                ImagemUrl = sugestao.Imagem ?? string.Empty,
-                LinkProduto = $"/produto/{sugestao.Id}"
-            };
+            return CriarProdutoDto(sugestao, usuarioId);
         }
 
         private static string FormatarListaProdutos(IReadOnlyList<string> nomes)
@@ -883,7 +859,7 @@ namespace EcommerceSports.Applications.Services
             var mensagem = $"Entendido. Que tal experimentar {FormatarListaProdutos(nomes)}?";
 
             var produtosDto = alternativasSelecionadas
-                .Select(ConverterSugestaoParaDto)
+                .Select(a => ConverterSugestaoParaDto(a, usuarioId))
                 .ToList();
 
             memoria.UltimaSugestao = alternativasSelecionadas.Last();
@@ -891,6 +867,7 @@ namespace EcommerceSports.Applications.Services
             return new ChatbotRespostaDTO
             {
                 Tipo = "lista",
+                Layout = "cards",
                 Mensagem = mensagem,
                 Produtos = produtosDto
             };
@@ -923,6 +900,7 @@ namespace EcommerceSports.Applications.Services
             public string Categoria { get; set; } = string.Empty;
             public decimal Preco { get; set; }
             public string? Imagem { get; set; }
+            public string? Descricao { get; set; }
         }
 
         private bool DetectarForaDeEscopo(string mensagem)
@@ -932,7 +910,7 @@ namespace EcommerceSports.Applications.Services
             return termosForaEscopo.Any(termo => mensagemLower.Contains(termo));
         }
 
-        private async Task<ChatbotRespostaDTO> GerarRespostaFallback(string mensagemUsuario, Dictionary<string, object> contexto)
+        private async Task<ChatbotRespostaDTO> GerarRespostaFallback(string mensagemUsuario, Dictionary<string, object> contexto, int usuarioId)
         {
             _logger?.LogInformation("Gerando resposta fallback para: {Mensagem}", mensagemUsuario);
             
@@ -948,15 +926,7 @@ namespace EcommerceSports.Applications.Services
                         .Where(p => p.Categoria.Contains("Futebol", StringComparison.OrdinalIgnoreCase) || 
                                    p.Nome.Contains("futebol", StringComparison.OrdinalIgnoreCase))
                         .Take(5)
-                        .Select(p => new ProdutoDTO
-                        {
-                            Id = p.Id.ToString(),
-                            Nome = p.Nome,
-                            Preco = (decimal)p.Preco,
-                            Categoria = p.Categoria,
-                            ImagemUrl = p.Imagem ?? "",
-                            LinkProduto = $"/produto/{p.Id}"
-                        })
+                        .Select(p => CriarProdutoDto(p, usuarioId))
                         .ToList();
 
                     if (produtosFutebol.Any())
@@ -964,6 +934,7 @@ namespace EcommerceSports.Applications.Services
                         return new ChatbotRespostaDTO
                         {
                             Tipo = "lista",
+                            Layout = "cards",
                             Mensagem = "Encontrei alguns produtos de futebol para você:",
                             Produtos = produtosFutebol
                         };
@@ -984,15 +955,7 @@ namespace EcommerceSports.Applications.Services
                         .Where(p => p.Categoria.Contains("Basquete", StringComparison.OrdinalIgnoreCase) || 
                                    p.Nome.Contains("basquete", StringComparison.OrdinalIgnoreCase))
                         .Take(5)
-                        .Select(p => new ProdutoDTO
-                        {
-                            Id = p.Id.ToString(),
-                            Nome = p.Nome,
-                            Preco = (decimal)p.Preco,
-                            Categoria = p.Categoria,
-                            ImagemUrl = p.Imagem ?? "",
-                            LinkProduto = $"/produto/{p.Id}"
-                        })
+                        .Select(p => CriarProdutoDto(p, usuarioId))
                         .ToList();
 
                     if (produtosBasquete.Any())
@@ -1000,6 +963,7 @@ namespace EcommerceSports.Applications.Services
                         return new ChatbotRespostaDTO
                         {
                             Tipo = "lista",
+                            Layout = "cards",
                             Mensagem = "Encontrei alguns produtos de basquete para você:",
                             Produtos = produtosBasquete
                         };
@@ -1033,6 +997,70 @@ namespace EcommerceSports.Applications.Services
         {
             _logger?.LogInformation("Chatbot resposta tipo: {Tipo}", tipo);
             // Aqui você pode adicionar métricas para Prometheus, AppInsights, etc.
+        }
+
+        private ChatbotAcaoDTO CriarAcaoAdicionarCarrinho(int usuarioId, int produtoId, decimal precoUnitario, string produtoNome)
+        {
+            return new ChatbotAcaoDTO
+            {
+                Tipo = "comprar",
+                Label = "Comprar",
+                Metodo = "POST",
+                Endpoint = $"/api/Carrinho/{usuarioId}/adicionar",
+                Payload = new
+                {
+                    produtoId,
+                    quantidade = 1,
+                    precoUnitario,
+                    nomeProduto = produtoNome
+                },
+                Headers = new Dictionary<string, string>
+                {
+                    ["Content-Type"] = "application/json"
+                }
+            };
+        }
+
+        private static string? ConstruirDescricaoCurta(string? descricao)
+        {
+            if (string.IsNullOrWhiteSpace(descricao))
+            {
+                return null;
+            }
+
+            var texto = descricao.Trim();
+            return texto.Length <= 160 ? texto : texto.Substring(0, 157) + "...";
+        }
+
+        private ProdutoDTO CriarProdutoDto(Produto produto, int usuarioId)
+        {
+            var preco = (decimal)produto.Preco;
+            return new ProdutoDTO
+            {
+                Id = produto.Id.ToString(),
+                Nome = produto.Nome,
+                Preco = preco,
+                Categoria = produto.Categoria,
+                ImagemUrl = produto.Imagem ?? string.Empty,
+                LinkProduto = $"/produto/{produto.Id}",
+                DescricaoCurta = ConstruirDescricaoCurta(produto.Descricao),
+                Acao = CriarAcaoAdicionarCarrinho(usuarioId, produto.Id, preco, produto.Nome)
+            };
+        }
+
+        private ProdutoDTO CriarProdutoDto(ProdutoSugestao sugestao, int usuarioId)
+        {
+            return new ProdutoDTO
+            {
+                Id = sugestao.Id.ToString(),
+                Nome = sugestao.Nome,
+                Preco = sugestao.Preco,
+                Categoria = sugestao.Categoria,
+                ImagemUrl = sugestao.Imagem ?? string.Empty,
+                LinkProduto = $"/produto/{sugestao.Id}",
+                DescricaoCurta = ConstruirDescricaoCurta(sugestao.Descricao),
+                Acao = CriarAcaoAdicionarCarrinho(usuarioId, sugestao.Id, sugestao.Preco, sugestao.Nome)
+            };
         }
     }
 }
