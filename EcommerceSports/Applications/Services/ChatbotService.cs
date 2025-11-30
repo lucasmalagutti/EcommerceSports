@@ -58,7 +58,6 @@ namespace EcommerceSports.Applications.Services
 
         public async Task<ChatbotRespostaDTO> ProcessarMensagem(string mensagemUsuario, int? usuarioId = null)
         {
-            // Caso 7: Entrada vazia
             if (string.IsNullOrWhiteSpace(mensagemUsuario))
             {
                 return new ChatbotRespostaDTO
@@ -68,78 +67,20 @@ namespace EcommerceSports.Applications.Services
                 };
             }
 
-            // Detectar feedback negativo
-            var feedbackNegativo = DetectarFeedbackNegativo(mensagemUsuario);
-            var produtosExcluir = new List<string>();
             var usuarioContexto = usuarioId ?? 33;
+            var contexto = await MontarContexto(usuarioContexto, feedbackNegativo: false, produtosExcluir: new List<string>());
+            contexto["consultaAtual"] = mensagemUsuario;
 
-            if (feedbackNegativo)
-            {
-                var respostaFeedback = await TentarResponderFeedbackNegativo(usuarioContexto, mensagemUsuario);
-                if (respostaFeedback != null)
-                {
-                    return respostaFeedback;
-                }
-            }
-
-            // Montar contexto
-            var contexto = await MontarContexto(usuarioId ?? usuarioContexto, feedbackNegativo, produtosExcluir);
-
-            // Caso 4: Busca direta por produto
-            var buscaDireta = await TentarBuscaDireta(mensagemUsuario, usuarioContexto);
-            if (buscaDireta != null)
-            {
-                return buscaDireta;
-            }
-
-            var recomendacaoHistorico = await TentarRecomendacaoPersonalizada(mensagemUsuario, usuarioContexto);
-            if (recomendacaoHistorico != null)
-            {
-                return recomendacaoHistorico;
-            }
-
-            if (!feedbackNegativo)
-            {
-            var respostaPalavrasChave = await TentarRespostaComPalavrasChave(mensagemUsuario, usuarioContexto);
-                if (respostaPalavrasChave != null)
-                {
-                    return respostaPalavrasChave;
-                }
-            }
-
-            // Caso 6: Detectar perguntas fora de escopo
-            if (DetectarForaDeEscopo(mensagemUsuario))
-            {
-                return new ChatbotRespostaDTO
-                {
-                    Tipo = "texto",
-                    Mensagem = "Desculpe, não tenho acesso a essa informação. Posso ajudar em produtos esportivos ou tirar dúvidas sobre equipamentos. Como posso ajudar?"
-                };
-            }
-
-            // Montar prompt completo
             var fullPrompt = await MontarPromptCompleto(mensagemUsuario, contexto);
             _logger?.LogDebug("Prompt completo montado. Tamanho: {Tamanho} caracteres", fullPrompt.Length);
 
-            // Chamar Gemini
             _logger?.LogInformation("Chamando Gemini para mensagem: {Mensagem}", mensagemUsuario);
             var respostaBruta = await _geminiService.GerarConteudo(fullPrompt, contexto);
-            _logger?.LogInformation("Resposta bruta do Gemini recebida. Tamanho: {Tamanho}, Conteúdo: {Conteudo}", 
+            _logger?.LogInformation("Resposta bruta do Gemini recebida. Tamanho: {Tamanho}, Conteúdo: {Conteudo}",
                 respostaBruta?.Length ?? 0, respostaBruta?.Substring(0, Math.Min(500, respostaBruta?.Length ?? 0)) ?? "vazio");
 
-            // Interpretar resposta
             var resposta = InterpretarResposta(respostaBruta ?? string.Empty);
-            
-            // Se a resposta ainda estiver vazia ou inválida, tentar fallback baseado na mensagem
-            if (string.IsNullOrWhiteSpace(resposta.Mensagem) || resposta.Mensagem == "Desculpe, não entendi. Pode ser mais específico?")
-            {
-                resposta = await GerarRespostaFallback(mensagemUsuario, contexto, usuarioContexto);
-            }
-            
-            _logger?.LogInformation("Resposta interpretada. Tipo: {Tipo}, Mensagem: {Mensagem}, Produtos: {Count}", 
-                resposta.Tipo, resposta.Mensagem, resposta.Produtos?.Count ?? 0);
 
-            // Normalizar produtos (buscar dados canônicos do banco)
             if (resposta.Produtos != null && resposta.Produtos.Any())
             {
                 resposta.Produtos = await NormalizarProdutos(resposta.Produtos, usuarioContexto);
@@ -149,9 +90,7 @@ namespace EcommerceSports.Applications.Services
                 }
             }
 
-            // Log de métricas
             LogMetrica(resposta.Tipo);
-
             return resposta;
         }
 
@@ -228,24 +167,28 @@ namespace EcommerceSports.Applications.Services
                 }
             }
 
-            // Buscar top 50 produtos do catálogo
+            // Buscar catálogo completo de produtos
             try
             {
                 var todosProdutos = await _produtoRepository.ListarTodos();
-                var catalogoList = todosProdutos
-                    .Take(50)
+                var catalogoCompleto = todosProdutos
                     .Select(p => new Dictionary<string, object>
                     {
                         ["id"] = p.Id.ToString(),
                         ["nome"] = p.Nome,
                         ["categoria"] = p.Categoria,
                         ["preco"] = (decimal)p.Preco,
-                        ["descricao"] = p.Descricao?.Substring(0, Math.Min(200, p.Descricao.Length)) ?? ""
+                        ["estoque"] = p.QtdEstoque,
+                        ["imagem"] = p.Imagem ?? string.Empty,
+                        ["descricao"] = p.Descricao?.Trim() is { Length: > 400 } descricaoLonga
+                            ? descricaoLonga.Substring(0, 397) + "..."
+                            : p.Descricao?.Trim() ?? string.Empty
                     })
                     .Cast<Dictionary<string, object>>()
                     .ToList();
 
-                contexto["catalogo_sample"] = catalogoList;
+                contexto["catalogo_completo"] = catalogoCompleto;
+                contexto["catalogo_sample"] = catalogoCompleto.Take(50).ToList();
             }
             catch (Exception ex)
             {
@@ -288,12 +231,8 @@ namespace EcommerceSports.Applications.Services
                 _logger?.LogError(ex, "Erro ao ler arquivos de prompt");
             }
 
-            var contextoJson = JsonSerializer.Serialize(contexto, new JsonSerializerOptions
-            {
-                WriteIndented = false
-            });
-
-            return $"{systemPrompt}\n\n{fewShot}\n\nContexto: {contextoJson}\n\nUsuario: {mensagemUsuario}";
+            var instrucaoContexto = "Use o JSON de contexto fornecido separadamente (catalogo_completo, historico e dados do usuário) para construir a resposta no formato solicitado.";
+            return $"{systemPrompt}\n\n{fewShot}\n\n{instrucaoContexto}\n\nUsuario: {mensagemUsuario}";
         }
 
         private ChatbotRespostaDTO InterpretarResposta(string respostaBruta)

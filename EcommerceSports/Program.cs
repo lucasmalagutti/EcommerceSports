@@ -25,7 +25,7 @@ builder.Services.AddScoped<ICartaoRepository, CartaoRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IChatbotService, ChatbotService>();
-builder.Services.AddHttpClient<IGoogleGeminiService, GoogleGeminiService>();
+builder.Services.AddSingleton<IGoogleGeminiService, GoogleGeminiService>();
 builder.Services.AddScoped<ITelefoneRepository, TelefoneRepository>();
 builder.Services.AddScoped<IValidators, Validators>();
 builder.Services.AddScoped<ICarrinhoService, CarrinhoService>();

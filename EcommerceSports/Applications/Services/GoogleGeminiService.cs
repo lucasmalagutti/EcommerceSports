@@ -1,126 +1,120 @@
-using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using Google.GenAI;
+using Google.GenAI.Types;
 using EcommerceSports.Applications.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace EcommerceSports.Applications.Services
 {
-    public class GoogleGeminiService : IGoogleGeminiService
+    public class GoogleGeminiService : IGoogleGeminiService, IDisposable, IAsyncDisposable
     {
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
+        private readonly Client _client;
         private readonly ILogger<GoogleGeminiService>? _logger;
-        private const int TimeoutSeconds = 15;
-        private const int MaxRetries = 1;
+        private const string ModelName = "gemini-2.5-flash";
 
-        public GoogleGeminiService(HttpClient httpClient, IConfiguration configuration, ILogger<GoogleGeminiService>? logger = null)
+        public GoogleGeminiService(IConfiguration configuration, ILogger<GoogleGeminiService>? logger = null)
         {
-            _httpClient = httpClient;
-            _configuration = configuration;
             _logger = logger;
-            _httpClient.Timeout = TimeSpan.FromSeconds(TimeoutSeconds);
+
+            var apiKey = configuration["GoogleGenAI:ApiKey"] ?? configuration["Gemini:ApiKey"];
+            if (!string.IsNullOrWhiteSpace(apiKey))
+            {
+                if (string.IsNullOrWhiteSpace(System.Environment.GetEnvironmentVariable("GEMINI_API_KEY")))
+                {
+                    System.Environment.SetEnvironmentVariable("GEMINI_API_KEY", apiKey);
+                }
+
+                _client = new Client(apiKey: apiKey);
+            }
+            else
+            {
+                var envKey = System.Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+                if (string.IsNullOrWhiteSpace(envKey))
+                {
+                    _logger?.LogWarning("Nenhuma chave de API Gemini configurada via user-secrets ou variável de ambiente.");
+                }
+
+                _client = new Client();
+            }
         }
 
         public async Task<string> GerarConteudo(string prompt, object? contexto = null)
         {
-            var apiKey = _configuration["Gemini:ApiKey"];
-
-            if (string.IsNullOrEmpty(apiKey))
+            if (string.IsNullOrWhiteSpace(prompt))
             {
-                _logger?.LogError("Chave de API do Gemini não configurada");
-                throw new InvalidOperationException("Chave de API do Gemini não configurada em appsettings.json");
+                _logger?.LogWarning("Prompt vazio recebido ao chamar Gemini.");
+                return "{}";
             }
 
-            var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={apiKey}";
-
-            var requestBody = new
+            try
             {
-                contents = new[]
-                {
-                    new
-                    {
-                        role = "user",
-                        parts = new[]
-                        {
-                            new { text = prompt }
-                        }
-                    }
-                }
-            };
+                _logger?.LogInformation("Enviando prompt ao Gemini usando modelo {Modelo}.", ModelName);
 
-            var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-            
-            int retryCount = 0;
-            while (retryCount <= MaxRetries)
-            {
-                try
+                var userContent = new Content
                 {
-                    _logger?.LogInformation("Enviando requisição para Gemini API (tentativa {Tentativa})", retryCount + 1);
-                    var response = await _httpClient.PostAsync(endpoint, content);
+                    Role = "user",
+                    Parts = new List<Part>
+                    {
+                        new Part { Text = prompt }
+                    }
+                };
 
-                    if (response.IsSuccessStatusCode)
+                if (contexto != null)
+                {
+                    var contextoJson = JsonSerializer.Serialize(contexto, new JsonSerializerOptions
                     {
-                        var responseString = await response.Content.ReadAsStringAsync();
-                        _logger?.LogDebug("Resposta do Gemini recebida: {Resposta}", responseString);
+                        WriteIndented = false
+                    });
 
-                        try
-                        {
-                            using (JsonDocument doc = JsonDocument.Parse(responseString))
-                            {
-                                var candidates = doc.RootElement.GetProperty("candidates");
-                                if (candidates.GetArrayLength() == 0)
-                                {
-                                    _logger?.LogWarning("Resposta do Gemini sem candidatos");
-                                    return "{}";
-                                }
-                                
-                                var text = candidates[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
-                                _logger?.LogInformation("Texto extraído do Gemini: {Texto}", text);
-                                return text ?? "{}";
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger?.LogError(ex, "Erro ao parsear resposta do Gemini. Resposta: {Resposta}", responseString);
-                            return "{}";
-                        }
-                    }
-                    else
+                    userContent.Parts.Add(new Part
                     {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        _logger?.LogError("Erro na API Gemini. Status: {Status}, Resposta: {Resposta}", response.StatusCode, errorContent);
-                        
-                        if (response.StatusCode >= System.Net.HttpStatusCode.InternalServerError && retryCount < MaxRetries)
-                        {
-                            retryCount++;
-                            await Task.Delay(1000);
-                            continue;
-                        }
-                        return "{}";
-                    }
+                        Text = $"Contexto JSON:\n{contextoJson}"
+                    });
                 }
-                catch (TaskCanceledException ex) when (retryCount < MaxRetries)
+
+                var response = await _client.Models.GenerateContentAsync(ModelName, userContent);
+                var texto = response?.Candidates?
+                    .FirstOrDefault(candidate => candidate?.Content?.Parts?.Any() == true)?
+                    .Content?.Parts?
+                    .FirstOrDefault(part => !string.IsNullOrWhiteSpace(part.Text))?
+                    .Text;
+
+                if (string.IsNullOrWhiteSpace(texto))
                 {
-                    _logger?.LogWarning(ex, "Timeout na requisição ao Gemini (tentativa {Tentativa})", retryCount + 1);
-                    retryCount++;
-                    await Task.Delay(1000);
-                    continue;
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogError(ex, "Erro inesperado ao chamar Gemini API");
-                    if (retryCount < MaxRetries)
-                    {
-                        retryCount++;
-                        await Task.Delay(1000);
-                        continue;
-                    }
+                    _logger?.LogWarning("Resposta do Gemini sem conteúdo textual retornado.");
                     return "{}";
                 }
-            }
 
-            _logger?.LogError("Falha ao obter resposta do Gemini após {Tentativas} tentativas", MaxRetries + 1);
-            return "{}";
+                return texto;
+            }
+            catch (ClientError ex)
+            {
+                _logger?.LogError(ex, "Erro de cliente ao chamar a API Gemini.");
+                return "{}";
+            }
+            catch (ServerError ex)
+            {
+                _logger?.LogError(ex, "Erro de servidor ao chamar a API Gemini.");
+                return "{}";
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Erro inesperado ao chamar a API Gemini.");
+                return "{}";
+            }
+        }
+
+        public void Dispose()
+        {
+            _client.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return _client.DisposeAsync();
         }
     }
 }
